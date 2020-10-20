@@ -57,69 +57,12 @@ window.requestAnimationFrame = (function () {
 nx.onload = () => {
   nx.sendsTo("js");
 
-  o1a.set({
-    value: 0,
-  });
   o1a.init();
-  o2a.set({
-    value: 0,
-  });
-  o2a.init();
-  o3a.set({
-    value: 0,
-  });
-  o3a.init();
-
-  o1b.set({
-    value: 0,
-  });
   o1b.init();
-  o2b.set({
-    value: 0,
-  });
-  o2b.init();
-  o3b.set({
-    value: 0,
-  });
-  o3b.init();
-  o1c.set({
-    value: 0,
-  });
   o1c.init();
-  o2c.set({
-    value: 0,
-  });
-  o2c.init();
-  o3c.set({
-    value: 0,
-  });
-  o3c.init();
-
-  o1d.set({
-    value: 0.5,
-  });
   o1d.init();
-  o2d.set({
-    value: 0.5,
-  });
-  o2d.init();
-  o3d.set({
-    value: 0.5,
-  });
-  o3d.init();
-
-  o1e.set({
-    value: 0.25,
-  });
   o1e.init();
-  o2e.set({
-    value: 0.25,
-  });
-  o2e.init();
-  o3e.set({
-    value: 0.25,
-  });
-  o3e.init();
+
   vca.val.x = 0;
   vca.val.y = 0;
   vca.init();

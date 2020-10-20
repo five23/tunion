@@ -16,17 +16,13 @@
       </div>
       <canvas id="view1" width="666" height="333"></canvas>
 
-      <div id="scopes"></div>
       <div class="fieldset">
         <canvas id="vca" nx="position" width="134" height="130"></canvas>
         <canvas nx="dial" style="width:65px;height:65px" id="o1a" class="nx" height="130" width="130" min="0" max="1"></canvas>
         <canvas nx="dial" style="width:65px;height:65px" id="o1b" class="nx" height="130" width="130" min="0" max="1"></canvas>
         <canvas nx="dial" style="width:65px;height:65px" id="o1c" class="nx" height="130" width="130" min="0" max="1"></canvas>
         <canvas nx="dial" style="width:65px;height:65px" id="o1d" class="nx" height="130" width="130" min="0" max="1"></canvas>
-        <canvas nx="dial" style="width:65px;height:65px" id="o1e" class="nx" height="130" width="130" min="0" max="1"></canvas>
-        <canvas nx="dial" style="width:65px;height:65px" id="o1f" class="nx" height="130" width="130" min="0" max="1"></canvas>        
-        <canvas nx="dial" style="width:65px;height:65px" id="o1g" class="nx" height="130" width="130" min="0" max="1"></canvas>
-        <canvas nx="dial" style="width:65px;height:65px" id="o1h" class="nx" height="130" width="130" min="0" max="1"></canvas>
+        <canvas nx="dial" style="width:65px;height:65px" id="o1e" class="nx" height="130" width="130" min="0" max="1"></canvas>        
       </div>
 
       <div class="fieldset">
@@ -36,9 +32,6 @@
         <canvas nx="dial" style="width:65px;height:65px" id="o2c" class="nx" height="130" width="130" min="0" max="1"></canvas>
         <canvas nx="dial" style="width:65px;height:65px" id="o2d" class="nx" height="130" width="130" min="0" max="1"></canvas>
         <canvas nx="dial" style="width:65px;height:65px" id="o2e" class="nx" height="130" width="130" min="0" max="1"></canvas>
-        <canvas nx="dial" style="width:65px;height:65px" id="o2f" class="nx" height="130" width="130" min="0" max="1"></canvas>        
-        <canvas nx="dial" style="width:65px;height:65px" id="o2g" class="nx" height="130" width="130" min="0" max="1"></canvas>
-        <canvas nx="dial" style="width:65px;height:65px" id="o2h" class="nx" height="130" width="130" min="0" max="1"></canvas>
       </div>
 
       <div class="fieldset">
@@ -48,9 +41,6 @@
         <canvas nx="dial" style="width:65px;height:65px" id="o3c" class="nx" height="130" width="130" min="0" max="1"></canvas>
         <canvas nx="dial" style="width:65px;height:65px" id="o3d" class="nx" height="130" width="130" min="0" max="1"></canvas>        
         <canvas nx="dial" style="width:65px;height:65px" id="o3e" class="nx" height="130" width="130" min="0" max="1"></canvas>
-        <canvas nx="dial" style="width:65px;height:65px" id="o3f" class="nx" height="130" width="130" min="0" max="1"></canvas>        
-        <canvas nx="dial" style="width:65px;height:65px" id="o3g" class="nx" height="130" width="130" min="0" max="1"></canvas>
-        <canvas nx="dial" style="width:65px;height:65px" id="o3h" class="nx" height="130" width="130" min="0" max="1"></canvas>
       </div>
       
       <div class="fieldset">      
@@ -58,10 +48,6 @@
         <canvas nx="dial" style="width:65px;height:65px" id="delayFeedback" class="nx" height="130" width="130" min="0" max="1"></canvas>
         <canvas nx="dial" style="width:65px;height:65px" id="delayTime" class="nx" height="130" width="130" min="0" max="1"></canvas>
         <canvas nx="dial" style="width:65px;height:65px" id="delayGain" class="nx" height="130" width="130" min="0" max="1"></canvas>        
-        <canvas nx="dial" style="width:65px;height:65px" id="delay2Input" class="nx" height="130" width="130" min="0" max="1"></canvas>
-        <canvas nx="dial" style="width:65px;height:65px" id="delay2Feedback" class="nx" height="130" width="130" min="0" max="1"></canvas>
-        <canvas nx="dial" style="width:65px;height:65px" id="delay2Time" class="nx" height="130" width="130" min="0" max="1"></canvas>                
-        <canvas nx="dial" style="width:65px;height:65px" id="delay2Gain" class="nx" height="130" width="130" min="0" max="1"></canvas>
       </div>
   </div>
 <div id="editor">
@@ -75,24 +61,21 @@
   
   const omega = (TAU * fc) / fs; // Angular frequency
   
-  let delay = Delay(8192);
+  let delay = Delay(16384);
   let delayOut = 0;
   
   function process(a) {
-      
-    var b = a.outputBuffer;
-    //inL = a.inputBuffer.getChannelData(0);
-    outL = b.getChannelData(0);
+    inL = a.inputBuffer.getChannelData(0);
+    outL = a.outputBuffer.getChannelData(0);
   
     for (a = 0; a < outL.length; a++) {
-        
       // Filter delay controller changes
       delayInput.n = lowpass(delayInput.val.value, delayInput.n);
       delayFeedback.n = lowpass(
         delayFeedback.val.value * 0.998 + 0.01,
         delayFeedback.n
       );
-      delayTime.n = lowpass(delayTime.val.value * 8000 + 192, delayTime.n);
+      delayTime.n = lowpass(delayTime.val.value * 16000 + 380, delayTime.n);
       delayGain.n = lowpass(delayGain.val.value * 0.998 + 0.001, delayGain.n);
   
       // Osc pre gain
@@ -115,13 +98,13 @@
       bX += vcb.val.x;
       cX += vcc.val.x;
   
-      aX *= 1.000000003;
-      bX *= 1.000000002;
-      cX *= 0.999999998;
+      aX *= 1.00000002616;
+      bX *= 1.00000001323;
+      cX *= 0.99999998524;
   
-      aZ = a0 * sawtooth(omega * aX, aN + o1a.val.value * K.fBm1d(cZ));
-      bZ = b0 * triangle(omega * bX, bN + o2a.val.value * K.fBm1d(aZ));
-      cZ = c0 *   square(omega * cX, cN + o3a.val.value * K.fBm1d(bZ));
+      aZ = 0.5 * a0 * sawtooth(omega * aX, aN);
+      bZ = 0.5 * b0 * triangle(omega * bX, bN);
+      cZ = 0.5 * c0 * square(omega * cX, cN);
   
       // Mix it!
       out = 0.5 * (a1 * aZ + b1 * bZ + c1 * cZ);
@@ -245,9 +228,9 @@
     if (this.counter >= this.size) this.counter = 0;
   
     return out;
-  };      
-        
-  </div>
+  };  
+  
+</div>
   <script type="text/javascript" src="js/o3djs/base.js"></script>
   <script type="text/javascript" src="js/cameracontroller.js"></script>
   <script type="text/javascript" src="js/moz/matrix4x4.js"></script>
