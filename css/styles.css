@@ -1,0 +1,101 @@
+/*----------------------------------//
+      _ __/`\/
+    /'( _ (^'
+    /'| `>\ UNiON S0NGBOOK
+/*----------------------------------*/
+
+body {
+  padding: 0;
+  margin: 0;
+  background-color: #fef2f4;
+  color: #333;
+}
+
+#gui {
+  position: absolute;
+  margin: 0;
+  z-index: 20;
+  padding: 20px 0 0 20px;
+  width: 700px;
+}
+
+#editor {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 720px;
+  bottom: 0;
+  z-index: 10;
+  font: 16px/normal 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+}
+
+#waveform {
+  padding: 0 0 0 0;
+  margin: 0 0 2px 2px;
+  border: 2px solid #a32da3;
+  opacity: 1;
+}
+
+#view1 {
+  margin: 10px 0;
+}
+
+.visuals {
+  color: #E6E1DC;
+  font: 14px/normal 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+  padding: 4px 0 8px;
+}
+
+.radioset {
+  font-family: monaco, Consolas, "Lucida Console", monospace;
+  font-size: 14px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: 500;
+  line-height: 26.4px;
+}
+
+h1 {
+  font-family: monaco, Consolas, "Lucida Console", monospace;
+  font-size: 24px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: 500;
+  line-height: 26.4px;
+}
+
+h3 {
+  font-family: monaco, Consolas, "Lucida Console", monospace;
+  font-size: 14px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: 500;
+  line-height: 15.4px;
+}
+
+p {
+  font-family: monaco, Consolas, "Lucida Console", monospace;
+  font-size: 14px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+blockquote {
+  font-family: monaco, Consolas, "Lucida Console", monospace;
+  font-size: 21px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: 400;
+  line-height: 30px;
+}
+
+pre {
+  font-family: monaco, Consolas, "Lucida Console", monospace;
+  font-size: 13px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: 400;
+  line-height: 18.5714px;
+}
