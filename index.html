@@ -6,6 +6,9 @@
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+  <header>
+    <a href="#" id="editor-toggle" data-panel="main">Toggle Editor</a>
+  </header>
   <div id="gui">
 
       <div class="radioset">
@@ -50,7 +53,7 @@
         <canvas nx="dial" style="width:65px;height:65px" id="delayGain" class="nx" height="130" width="130" min="0" max="1"></canvas>        
       </div>
   </div>
-<div id="editor">
+<div id="editor" class="editor">
   const K = new kMath();
   const EPSILON = 2.2204460492503130808472633361816e-16;
   const PI = 3.1415926535897932384626433832795; // @constant {Number} pi
@@ -240,5 +243,6 @@
   <script type="text/javascript" src="js/alt.nexusUI.js"></script>
   <script type="text/javascript" src="js/kmath.js"></script>
   <script type="text/javascript" src="js/audiopen.js"></script>
+  <script type="text/javascript" src="js/collapse.js"></script>
 </body>
 </html>

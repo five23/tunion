@@ -110,7 +110,16 @@ nx.onload = () => {
   }
 };
 
+/**
+ *
+ *
+ * @class AudioPen
+ */
 class AudioPen {
+  /**
+   * Creates an instance of AudioPen.
+   * @memberof AudioPen
+   */
   constructor() {
     this.apiFunctionNames = ["process"];
     this.isPlaying = false;
@@ -135,6 +144,12 @@ class AudioPen {
     });
   }
 
+  /**
+   *
+   *
+   * @param {*} stream
+   * @memberof AudioPen
+   */
   start(stream) {
     var self = this;
 
@@ -167,6 +182,12 @@ class AudioPen {
     this.mainLoop();
   }
 
+  /**
+   *
+   *
+   * @return {*} 
+   * @memberof AudioPen
+   */
   compileCode() {
     let code = this.editor.getValue();
     var memberDefs = [];
@@ -191,10 +212,21 @@ class AudioPen {
     return true;
   }
 
+  /**
+   *
+   *
+   * @param {*} buffer
+   * @memberof AudioPen
+   */
   executeCode(buffer) {
     buffer = this.compiledCode.process(buffer);
   }
 
+  /**
+   *
+   *
+   * @memberof AudioPen
+   */
   mainLoop() {
     var self = this;
 
@@ -215,6 +247,11 @@ class AudioPen {
   }
 }
 
+/**
+ *
+ *
+ * @param {*} a
+ */
 function AudioPenAPI(a) {
   var core = a;
   this.sampleRate = () => {
