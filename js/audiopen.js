@@ -1,3 +1,9 @@
+/*----------------------------------//
+      _ __/`\/
+    /'( _ (^'
+    /'| `>\ uni0nsongbook
+/*----------------------------------*/
+
 var audiopen = null,
   analyser;
 
@@ -24,11 +30,7 @@ var a0 = 0,
   aZ = 0,
   bZ = 0,
   cZ = 0,
-  dZ = 0,
-  aY = 0,
-  bY = 0,
-  cY = 0,
-  dY = 0;
+  dZ = 0;
 
 var inL, outL, out;
 
@@ -55,13 +57,26 @@ window.requestAnimationFrame = (function () {
 })();
 
 nx.onload = () => {
+
+  var editor = document.getElementById("editor");
+  var editorToggle = Nexus.Add.Toggle("#header-panel");
+
+  editorToggle.on('change',function(v) {
+    if (hasClass(editor, "visible")) {
+      removeClass(editor, "visible");
+    } else {
+      addClass(editor, "visible");
+    }
+  });
+  
+  var vizSelect = Nexus.Add.RadioButton('#header-panel',{
+    'size': [120,25],
+    'numberOfButtons': 4,
+    'active': -1
+  });
+
   nx.sendsTo("js");
 
-  o1a.init();
-  o1b.init();
-  o1c.init();
-  o1d.init();
-  o1e.init();
 
   vca.val.x = 0;
   vca.val.y = 0;
@@ -214,18 +229,6 @@ AudioPen.prototype = {
   },
 };
 
-var editorToggle = document.getElementById("editor-toggle");
-var editor = document.getElementById("editor");
-
-editorToggle.addEventListener("click", function (event) {
-  event.preventDefault();
-
-  if (hasClass(editor, "visible")) {
-    removeClass(editor, "visible");
-  } else {
-    addClass(editor, "visible");
-  }
-});
 
 /**
  *

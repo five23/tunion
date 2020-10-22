@@ -1,20 +1,19 @@
 /*----------------------------------//
       _ __/`\/
     /'( _ (^'
-    /'| `>\ UNiON S0NGBOOK
+    /'| `>\ uni0nsongbook
 /*----------------------------------*/
 
 body {
-  padding: 0;
+  padding: 20px;
   margin: 0;
   background-color: #fef2f4;
   color: #333;
 }
 
 #gui {
-  position: absolute;
   margin: 0;
-  padding: 20px 0 0 20px;
+  padding: 0;
   width: 100%;
 }
 
