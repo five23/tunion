@@ -56,7 +56,7 @@ window.requestAnimationFrame = (function () {
   );
 })();
 
-nx.onload = () => {
+window.onload = () => {
 
   var editor = document.getElementById("editor");
   var editorToggle = Nexus.Add.Toggle("#header-panel");
@@ -74,7 +74,7 @@ nx.onload = () => {
     'numberOfButtons': 4,
     'active': -1
   });
-
+/*
   nx.sendsTo("js");
 
 
@@ -105,6 +105,7 @@ nx.onload = () => {
   delayGain.set({ value: 0.5 });
   delayGain.init();
   delayGain.n = 0;
+*/
 
   audiopen = new AudioPen();
   if (navigator.mediaDevices) {

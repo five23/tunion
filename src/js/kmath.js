@@ -1,4 +1,4 @@
-const kMath = function() {
+function kMath() {
 
     const self = this;
 
@@ -1348,4 +1348,4 @@ const kMath = function() {
         }
         return output;
     };
-};
+}

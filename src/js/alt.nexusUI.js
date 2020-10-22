@@ -5258,9 +5258,7 @@ var nx = function () {
     oscName,
     uiIndex,
     data,
-    oscIp,
-    callbackFunction
-  ) {
+    oscIp  ) {
     if (this.ajaxRequestType == "post") {
       //console.log(oscIp);
       if (uiIndex) {
