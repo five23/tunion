@@ -12,10 +12,10 @@ uniform float yoffset;
 void main()
 {
     vec4 sample = texture2D(frequencyData, vec2(texCoord.x, yoffset));
-    if (texCoord.y > sample.a + 0.01 || texCoord.y < sample.a - 0.01) {
+    if (texCoord.y > sample.a + 0.005 || texCoord.y < sample.a - 0.005) {
         discard;
     }
-    float x = (texCoord.y - sample.a) / 0.01;
+    float x = (texCoord.y - sample.a) / 0.005;
     x = x * x * x;
     gl_FragColor = mix(foregroundColor, backgroundColor, x);
 }

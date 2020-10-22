@@ -110,48 +110,31 @@ nx.onload = () => {
   }
 };
 
-/**
- *
- *
- * @class AudioPen
- */
-class AudioPen {
-  /**
-   * Creates an instance of AudioPen.
-   * @memberof AudioPen
-   */
-  constructor() {
-    this.apiFunctionNames = ["process"];
-    this.isPlaying = false;
-    this.compiledCode = null;
-    this.lastCodeChangeTime = 0;
-    this.lastCompilationTime = 0;
-    this.compilationDelay = 1e3;
-    this.sampleRate = 44100;
-    this.bufferSize = 2048;
-    this.t = 0;
+function AudioPen() {
+  this.apiFunctionNames = ["process"];
+  this.isPlaying = false;
+  this.compiledCode = null;
+  this.lastCodeChangeTime = 0;
+  this.lastCompilationTime = 0;
+  this.compilationDelay = 1e3;
+  this.sampleRate = 44100;
+  this.bufferSize = 2048;
+  this.t = 0;
+}
 
-    this.audioContext = new (window.AudioContext ||
-      window.webkitAudioContext)();
+AudioPen.prototype = {
+  start: function (stream) {
+    var self = this;
 
+    this.audioContext = new AudioContext();
     this.analyserView = new AnalyserView("view1");
 
     this.editor = ace.edit("editor");
     this.editor.setShowPrintMargin(false);
     this.editor.getSession().setMode("ace/mode/javascript");
-    this.editor.on("change", (e) => {
+    this.editor.on("change", () => {
       self.lastCodeChangeTime = Date.now();
     });
-  }
-
-  /**
-   *
-   *
-   * @param {*} stream
-   * @memberof AudioPen
-   */
-  start(stream) {
-    var self = this;
 
     this.compileCode();
 
@@ -180,59 +163,41 @@ class AudioPen {
     this.analyserView.initByteBuffer();
 
     this.mainLoop();
-  }
+  },
 
-  /**
-   *
-   *
-   * @return {*} 
-   * @memberof AudioPen
-   */
-  compileCode() {
-    let code = this.editor.getValue();
+  compileCode: function () {
+    var code = this.editor.getValue();
     var memberDefs = [];
-
-    var fname = "process";
-    memberDefs.push(`${fname}:(typeof ${fname}=='function'?${fname}:null)`);
-
-    var callback = `\nreturn {${memberDefs.join(",")} };`;
-
-    code += callback;
-
+    for (var i = 0; i < this.apiFunctionNames.length; ++i) {
+      var fname = this.apiFunctionNames[i];
+      memberDefs.push(
+        fname + ":(typeof " + fname + "=='function'?" + fname + ":null)"
+      );
+    }
+    var appendix = "\nreturn {" + memberDefs.join(",") + " };";
+    code += appendix;
     this.lastCompilationTime = Date.now();
-
-    let pack = null;
+    var pack = null;
     try {
       pack = new Function(code)();
     } catch (ex) {
-      console.log(`Compilation failed: ${ex.message}\n${ex.stack}`);
+      console.log("Compilation failed: " + ex.message + "\n" + ex.stack);
       return false;
     }
     this.compiledCode = pack;
     return true;
-  }
+  },
 
-  /**
-   *
-   *
-   * @param {*} buffer
-   * @memberof AudioPen
-   */
-  executeCode(buffer) {
+  executeCode: function (buffer) {
+    if (buffer === null) return;
     buffer = this.compiledCode.process(buffer);
-  }
+  },
 
-  /**
-   *
-   *
-   * @memberof AudioPen
-   */
-  mainLoop() {
+  mainLoop: function () {
     var self = this;
 
-    window.requestAnimationFrame(() => {
+    requestAnimationFrame(function () {
       self.mainLoop();
-      self.analyserView.doFrequencyAnalysis();
     });
 
     if (
@@ -240,21 +205,49 @@ class AudioPen {
       this.lastCodeChangeTime > this.lastCompilationTime
     ) {
       this.compileCode();
-    }
-    if (this.compiledCode.onGui) {
+    } else if (this.compiledCode.onGui) {
       this.compiledCode.onGui();
     }
+
+    this.analyserView.doFrequencyAnalysis(this.analyser);
+    //this.renderWave();
+  },
+};
+
+var editorToggle = document.getElementById("editor-toggle");
+var editor = document.getElementById("editor");
+
+editorToggle.addEventListener("click", function (event) {
+  event.preventDefault();
+
+  if (hasClass(editor, "visible")) {
+    removeClass(editor, "visible");
+  } else {
+    addClass(editor, "visible");
   }
-}
+});
 
 /**
  *
  *
- * @param {*} a
+ * @param {*} el
+ * @param {*} className
+ * @return {*}
  */
-function AudioPenAPI(a) {
-  var core = a;
-  this.sampleRate = () => {
-    return core.sampleRate;
-  };
+hasClass = (el, name) => (el.matches("." + name) ? 1 : 0);
+
+function addClass(el, className) {
+  if (el.classList) {
+    el.classList.add(className);
+  } else if (!hasClass(el, className)) {
+    el.className += " " + className;
+  }
+}
+
+function removeClass(el, className) {
+  if (el.classList) el.classList.remove(className);
+  else if (hasClass(el, className)) {
+    var reg = new RegExp("(\\s|^)" + className + "(\\s|$)");
+    el.className = el.className.replace(reg, " ");
+  }
 }
