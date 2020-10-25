@@ -34,8 +34,6 @@ var a0 = 0,
 
 var inL, outL, out;
 
-o3djs.require("o3djs.shader");
-
 // Temporary patch until all browsers support unprefixed context.
 if (
   window.hasOwnProperty("AudioContext") &&
@@ -56,25 +54,40 @@ window.requestAnimationFrame = (function () {
   );
 })();
 
-window.onload = () => {
+function addClass(el, className) {
+  if (el.classList) {
+    el.classList.add(className);
+  } else if (!el.matches("." + className)) {
+    el.className += " " + className;
+  }
+}
 
+function removeClass(el, className) {
+  if (el.classList) el.classList.remove(className);
+  else if (!el.matches("." + className)) {
+    var reg = new RegExp("(\\s|^)" + className + "(\\s|$)");
+    el.className = el.className.replace(reg, " ");
+  }
+}
+
+window.onload = () => {
   var editor = document.getElementById("editor");
   var editorToggle = Nexus.Add.Toggle("#header-panel");
 
-  editorToggle.on('change',function(v) {
-    if (hasClass(editor, "visible")) {
+  editorToggle.on("change", function (v) {
+    if (!editor.matches(".visible")) {
       removeClass(editor, "visible");
     } else {
       addClass(editor, "visible");
     }
   });
-  
-  var vizSelect = Nexus.Add.RadioButton('#header-panel',{
-    'size': [120,25],
-    'numberOfButtons': 4,
-    'active': -1
+
+  var vizSelect = Nexus.Add.RadioButton("#header-panel", {
+    size: [120, 25],
+    numberOfButtons: 4,
+    active: -1,
   });
-/*
+  /*
   nx.sendsTo("js");
 
 
@@ -229,29 +242,3 @@ AudioPen.prototype = {
     //this.renderWave();
   },
 };
-
-
-/**
- *
- *
- * @param {*} el
- * @param {*} className
- * @return {*}
- */
-hasClass = (el, name) => (el.matches("." + name) ? 1 : 0);
-
-function addClass(el, className) {
-  if (el.classList) {
-    el.classList.add(className);
-  } else if (!hasClass(el, className)) {
-    el.className += " " + className;
-  }
-}
-
-function removeClass(el, className) {
-  if (el.classList) el.classList.remove(className);
-  else if (hasClass(el, className)) {
-    var reg = new RegExp("(\\s|^)" + className + "(\\s|$)");
-    el.className = el.className.replace(reg, " ");
-  }
-}
