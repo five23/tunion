@@ -169,7 +169,7 @@ function create3DDebugContext(context) {
  * Class AnalyserView
  */
 
-AnalyserView = function (canvasElementID) {
+var AnalyserView = function (canvasElementID) {
   this.canvasElementID = canvasElementID;
 
   // NOTE: the default value of this needs to match the selected radio button
