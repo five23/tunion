@@ -7,7 +7,11 @@
     <meta name="description" content="uni0nsongbook" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
   </head>
-  <body style="-webkit-user-select: none;"  ondragstart="return false;" ondrop="return false;">
+  <body
+    style="-webkit-user-select: none"
+    ondragstart="return false;"
+    ondrop="return false;"
+  >
     <header>
       <div id="header-panel"></div>
     </header>
@@ -157,6 +161,21 @@
       </div-->
     </main>
 
-    <div id="editor" class="editor"></div>
+    <div id="editor" class="editor">
+const fs = 44100; // Process Sampling Frequency
+const fc = 440; // Center frequency
+const z1 = 0.998; // Lowpass Filter Pole (for smoothing controller changes)
+const omega = (K.TAU * fc) / fs; // Angular frequency
+
+var inL, outL;
+
+function process(a) {
+  inL = a.inputBuffer.getChannelData(0);
+  outL = a.outputBuffer.getChannelData(0);
+
+  for (a = 0; a &lt; outL.length; a++) {
+    outL[a] = 0;
+  }
+}</div>
   </body>
 </html>

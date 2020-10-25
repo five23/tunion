@@ -1,9 +1,15 @@
-import "./scss/styles.scss";
+import 'ace-builds/src-noconflict/ace';
+import "ace-builds/src-noconflict/theme-github";
+import 'ace-builds/src-noconflict/mode-javascript';
 
-import "./js/cameracontroller.js";
-import "./js/moz/matrix4x4.js";
-import "./js/visualizer.js";
-import "./js/kmath.js";
+import jsWorkerUrl from "ace-builds/src-noconflict/worker-javascript";
+
+import "./scss/styles.scss";
 import "./js/audiopen.js";
 
 import { Delay } from "../node_modules/delay/index";
+
+window.editor = ace.edit('editor');
+window.editor.setShowPrintMargin(false);
+window.editor.getSession().setMode("ace/mode/javascript");
+
