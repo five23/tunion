@@ -27,11 +27,11 @@ body {
   position: fixed;
 }
 
-.editor {
+#editor {
   visibility: hidden;
 }
 
-.editor.visible {
+#editor.visible {
   visibility: visible;
 }
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>uni0nsongbook</title>
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="dist/css/styles.css">
 </head>
 <body>
   <header>
@@ -45,7 +45,7 @@
   </main>
 
 <div id="editor" class="editor">
-const K = new kMath();
+var K = window.K;
 const fs = 44100;              // Process Sampling Frequency
 const fc = 440;                // Center frequency
 const z1 = 0.998;              // Lowpass Filter Pole (for smoothing controller changes)

@@ -23,6 +23,9 @@ module.exports = {
         use: [
           {
             loader: "html-loader",
+            options: {
+              minimize: false
+            },
           },
         ],
       },
@@ -40,6 +43,7 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: "./src/index.html",
       filename: "./index.html",
+      minify: false
     }),
     new CopyWebpackPlugin({
       patterns: [{ from: "shaders/*", to: "." }],

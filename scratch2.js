@@ -1,48 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <title>uni0nsongbook</title>
-    <link rel="shortcut icon" href="favicon.ico" />
-    <meta charset="utf-8" />
-    <meta name="description" content="uni0nsongbook" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-  </head>
-  <body
-    style="-webkit-user-select: none"
-    ondragstart="return false;"
-    ondrop="return false;"
-  >
-    <header>
-      <div id="header-panel"></div>
-    </header>
-    <main id="gui">
-      <canvas id="view1" width="960" height="390"></canvas>
 
-      <div id="vco1" class="fieldset">
-        <div nexus-ui="dial" id="frequency"></div>
-        <div nexus-ui="dial" id="harmonics"></div>
-        <div nexus-ui="dial" id="amplitude"></div>
-        <div nexus-ui="dial" id="phaseMod"></div>
-        <div nexus-ui="dial" id="freqMod"></div>
-      </div>
-
-      <div id="vco2" class="fieldset">
-        <div nexus-ui="dial" id="frequency"></div>
-        <div nexus-ui="dial" id="harmonics"></div>
-        <div nexus-ui="dial" id="amplitude"></div>
-        <div nexus-ui="dial" id="phaseMod"></div>
-        <div nexus-ui="dial" id="freqMod"></div>
-      </div>
-
-      <div id="vco3" class="fieldset">
-        <div nexus-ui="dial" id="frequency"></div>
-        <div nexus-ui="dial" id="harmonics"></div>
-        <div nexus-ui="dial" id="amplitude"></div>
-        <div nexus-ui="dial" id="phaseMod"></div>
-        <div nexus-ui="dial" id="freqMod"></div>
-      </div>
-    </main>
-<div id="editor">
 var PRECISION = 32; /* Precision (in powers of 2) */
 
 var GAMMA  = 0.5772156649015328606065120900824; /* @constant {Number} Euler-Mascheroni constant */
@@ -180,7 +136,4 @@ function sawtooth(x, m) {
 
 function triangle(x, m) {
   return sawtooth(x, m) * square(x, m);
-}  
-</div>
-</body>
-</html>
+}
