@@ -1,10 +1,25 @@
-export { kMath };
-
-let kMath = () => {
+export function kMath() {
 
     const self = this;
 
-    
+    this.EPSILON = 2.2204460492503130808472633361816E-16;
+
+    this.PHI = 1.61803398874989484820458683436564; // @constant {Number} (1+sqrt(5))/2
+    this.TAU = 6.28318530717958647692528676655901; // @constant {Number} 2*pi
+    this.PI2 = 1.57079632679489661923132169163975; // @constant {Number} pi/2
+    this.GAMMA = 0.57721566490153286060651209008240; // @constant {Number} lim_(n->infty)(H_n-lnn)
+    this.ZETA2 = 1.64493406684822643647241516664603; // @constant {Number} zeta(2)
+    this.LOG2P = 0.91893853320467274178032973640562; // @constant {Number} 1/2 (log(2)+log(\[Pi]))
+    this.SQRT2PI = 2.50662827463100050241576528481105; // @constant {Number} sqrt(2 pi)
+    this.SQRT2 = 1.41421356237309504880168872420970; // @constant {Number} sqrt(2)
+    this.F2 = 0.36602540378443864676372317075294; // @constant {Number} 1/(1 + sqrt(3))
+    this.F3 = 0.33333333333333333333333333333333; // @constant {Number} 1/3
+    this.F4 = 0.30901699437494742410229341718282; // @constant {Number} 1/(1 + sqrt(5))
+    this.G2 = 0.21132486540518711774542560974902; // @constant {Number} 1/(3 + sqrt(3))
+    this.G3 = 0.16666666666666666666666666666667; // @constant {Number} 1/6
+    this.G4 = 0.13819660112501051517954131656344; // @constant {Number} 1/(5 + sqrt(5))
+    this.H2 = 0.57735026918962576450914878050196; // @constant {Number} 1/(sqrt(3))
+
 
     /*
      * csc
@@ -218,6 +233,30 @@ let kMath = () => {
 
 
     /*
+     * Factorial
+     *
+     * @param {Number} x
+     * @returns {x}
+     */
+    this.factorial = x => {
+
+        // Empty product
+        if (x === 0) {
+            return 1;
+        }
+        // Complex Infinity
+        else if (x > 170 || x < 0) {
+            return Infinity;
+        }
+        // Factor
+        else {
+            let v = x;
+            while (x > 1) {
+                v *= --x;
+            }
+            return v;
+        }
+    };
 
 
     /*
@@ -320,7 +359,7 @@ let kMath = () => {
      if (0 > b) {
        return self.digamma(1.0 - b) + Math.PI / Math.tan(-Math.PI * b);
      }
-     if (b <= self.EPSILON) {
+     if (b <= Number.EPSILON) {
        return 1.64493406684822643647241516664603 * b - 1.0 / b + 0.57721566490153286060651209008240;
      }
      for (; 8.0 > b; b += 1) {

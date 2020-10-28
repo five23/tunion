@@ -1,140 +1,24 @@
-//--------------------------------------------------------------------
-// WebGL Analyser
-//
+import { Matrix4x4 } from "./matrix4x4";
+import { CameraController, shader } from "./utils3d";
+
+// The "model" matrix is the "world" matrix in Standard Annotations and Semantics
+var model = new Matrix4x4();
+var view = new Matrix4x4();
+var projection = new Matrix4x4();
 
 var ANALYSISTYPE_FREQUENCY = 0;
 var ANALYSISTYPE_SONOGRAM = 1;
 var ANALYSISTYPE_3D_SONOGRAM = 2;
 var ANALYSISTYPE_WAVEFORM = 3;
 
-// The "model" matrix is the "world" matrix in Standard Annotations and Semantics
-var model = 0;
-var view = 0;
-var projection = 0;
-
-var shader = shader || {};
-
-shader.loadFromScriptNodes = (gl, vertexScriptName, fragmentScriptName) => {
-  const vertexScript = document.getElementById(vertexScriptName);
-  const fragmentScript = document.getElementById(fragmentScriptName);
-  if (!vertexScript || !fragmentScript) return null;
-  return new shader.Shader(gl, vertexScript.text, fragmentScript.text);
-};
-
-
-shader.loadTextFileSynchronous = url => {
-  const error = `loadTextFileSynchronous failed to load url "${url}"`;
-  let request;
-
-  request = new XMLHttpRequest();
-  if (request.overrideMimeType) {
-    request.overrideMimeType("text/plain");
-  }
-
-  request.open("GET", url, false);
-  request.send(null);
-  if (request.readyState != 4) {
-    throw error;
-  }
-  return request.responseText;
-};
-
-shader.loadFromURL = (gl, vertexURL, fragmentURL) => {
-  const vertexText = shader.loadTextFileSynchronous(vertexURL);
-  const fragmentText = shader.loadTextFileSynchronous(fragmentURL);
-
-  if (!vertexText || !fragmentText) return null;
-  return new shader.Shader(gl, vertexText, fragmentText);
-};
-
-shader.glslNameToJs_ = name => {
-  return name.replace(/_(.)/g, (_, p1) => {
-    return p1.toUpperCase();
-  });
-};
-
-shader.Shader = function (gl, vertex, fragment) {
-  this.program = gl.createProgram();
-  this.gl = gl;
-
-  const vs = this.loadShader(this.gl.VERTEX_SHADER, vertex);
-  if (vs == null) {
-    return;
-  }
-  this.gl.attachShader(this.program, vs);
-  this.gl.deleteShader(vs);
-
-  const fs = this.loadShader(this.gl.FRAGMENT_SHADER, fragment);
-  if (fs == null) {
-    return;
-  }
-  this.gl.attachShader(this.program, fs);
-  this.gl.deleteShader(fs);
-
-  this.gl.linkProgram(this.program);
-  this.gl.useProgram(this.program);
-
-  // Check the link status
-  const linked = this.gl.getProgramParameter(this.program, this.gl.LINK_STATUS);
-  if (!linked) {
-    const infoLog = this.gl.getProgramInfoLog(this.program);
-    output(`Error linking program:\n${infoLog}`);
-    this.gl.deleteProgram(this.program);
-    this.program = null;
-    return;
-  }
-
-  // find uniforms and attributes
-  const re = /(uniform|attribute)\s+\S+\s+(\S+)\s*;/g;
-  let match = null;
-  while ((match = re.exec(`${vertex}\n${fragment}`)) != null) {
-    const glslName = match[2];
-    const jsName = shader.glslNameToJs_(glslName);
-    const loc = -1;
-    if (match[1] == "uniform") {
-      this[`${jsName}Loc`] = this.getUniform(glslName);
-    } else if (match[1] == "attribute") {
-      this[`${jsName}Loc`] = this.getAttribute(glslName);
-    }
-    if (loc >= 0) {
-      this[`${jsName}Loc`] = loc;
-    }
-  }
-};
-
-shader.Shader.prototype.bind = function () {
-  this.gl.useProgram(this.program);
-};
-
-shader.Shader.prototype.loadShader = function (type, shaderSrc) {
-  const shader = this.gl.createShader(type);
-  if (shader == null) {
-    return null;
-  }
-
-  // Load the shader source
-  this.gl.shaderSource(shader, shaderSrc);
-  // Compile the shader
-  this.gl.compileShader(shader);
-  // Check the compile status
-  if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
-    const infoLog = this.gl.getShaderInfoLog(shader);
-    output(`Error compiling shader:\n${infoLog}`);
-    this.gl.deleteShader(shader);
-    return null;
-  }
-  return shader;
-};
-
-shader.Shader.prototype.getAttribute = function (name) {
-  return this.gl.getAttribLocation(this.program, name);
-};
-
-shader.Shader.prototype.getUniform = function (name) {
-  return this.gl.getUniformLocation(this.program, name);
-};
-
-function createGLErrorWrapper(context, fname) {
+/**
+ *
+ *
+ * @param {*} context
+ * @param {*} fname
+ * @return {*}
+ */
+export function createGLErrorWrapper(context, fname) {
   return function () {
     var rv = context[fname].apply(context, arguments);
     var err = context.getError();
@@ -143,7 +27,13 @@ function createGLErrorWrapper(context, fname) {
   };
 }
 
-function create3DDebugContext(context) {
+/**
+ *
+ *
+ * @param {*} context
+ * @return {*}
+ */
+export function create3DDebugContext(context) {
   // Thanks to Ilmari Heikkinen for the idea on how to implement this so elegantly.
   var wrap = {};
   for (var i in context) {
@@ -164,17 +54,13 @@ function create3DDebugContext(context) {
 }
 
 /**
- * Class AnalyserView
+ * AnalyserView
+ *
+ * @param {*} canvasElementID
  */
-
-var AnalyserView = function (canvasElementID) {
+export function AnalyserView(canvasElementID) {
   this.canvasElementID = canvasElementID;
-
-  // NOTE: the default value of this needs to match the selected radio button
-
-  // This analysis type may be overriden later on if we discover we don't support the right shader features.
   this.analysisType = ANALYSISTYPE_3D_SONOGRAM;
-
   this.sonogram3DWidth = 256;
   this.sonogram3DHeight = 256;
   this.sonogram3DGeometrySize = 10;
@@ -182,7 +68,6 @@ var AnalyserView = function (canvasElementID) {
   this.texture = 0;
   this.TEXTURE_HEIGHT = 256;
   this.yoffset = 0;
-
   this.frequencyShader = 0;
   this.waveformShader = 0;
   this.sonogramShader = 0;
@@ -190,17 +75,18 @@ var AnalyserView = function (canvasElementID) {
 
   // Background color
   this.backgroundColor = [191.0 / 255.0, 169.0 / 255.0, 135.0 / 255.0, 1.0];
+
   // Foreground color
   this.foregroundColor = [63.0 / 255.0, 39.0 / 255.0, 0.0 / 255.0, 1.0];
 
   this.initGL();
-};
+}
 
+/**
+ *
+ *
+ */
 AnalyserView.prototype.initGL = function () {
-  model = new Matrix4x4();
-  view = new Matrix4x4();
-  projection = new Matrix4x4();
-
   var sonogram3DWidth = this.sonogram3DWidth;
   var sonogram3DHeight = this.sonogram3DHeight;
   var sonogram3DGeometrySize = this.sonogram3DGeometrySize;
@@ -376,7 +262,8 @@ AnalyserView.prototype.initGL = function () {
     );
 };
 
-AnalyserView.prototype.initByteBuffer = function () {
+AnalyserView.prototype.initByteBuffer = function (analyser) {
+  var freqByteData;
   var gl = this.gl;
   var TEXTURE_HEIGHT = this.TEXTURE_HEIGHT;
 
@@ -416,6 +303,12 @@ AnalyserView.prototype.initByteBuffer = function () {
   }
 };
 
+/**
+ * setAnalysisType
+ *
+ * @param {*} type
+ * @return {*}
+ */
 AnalyserView.prototype.setAnalysisType = function (type) {
   // Check for read textures in vertex shaders.
   if (!this.has3DVisualizer && type == ANALYSISTYPE_3D_SONOGRAM) return;
@@ -423,11 +316,21 @@ AnalyserView.prototype.setAnalysisType = function (type) {
   this.analysisType = type;
 };
 
+/**
+ * analysisType
+ *
+ * @return {*}
+ */
 AnalyserView.prototype.analysisType = function () {
   return this.analysisType;
 };
 
-AnalyserView.prototype.doFrequencyAnalysis = function (event) {
+/**
+ * doFrequencyAnalysis
+ *
+ * @param {*} event
+ */
+AnalyserView.prototype.doFrequencyAnalysis = function (analyser) {
   var freqByteData = this.freqByteData;
 
   switch (this.analysisType) {
@@ -451,6 +354,10 @@ AnalyserView.prototype.doFrequencyAnalysis = function (event) {
   this.drawGL();
 };
 
+/**
+ * drawGL
+ *
+ */
 AnalyserView.prototype.drawGL = function () {
   var canvas = this.canvas;
   var gl = this.gl;

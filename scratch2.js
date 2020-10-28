@@ -19,7 +19,6 @@ var omega = (TAU*fc)/fs;
 var a0, a1, aN, aX, aZ, b0, b1, bN, bX, bZ, c0, c1, cN, cX, cZ;
 
 function process(a) {
-  inL = a.inputBuffer.getChannelData(0);
   outL = a.outputBuffer.getChannelData(0);
 
   for (a = 0; a < outL.length; a++) {
@@ -136,4 +135,4 @@ function sawtooth(x, m) {
 
 function triangle(x, m) {
   return sawtooth(x, m) * square(x, m);
-}
+}  
