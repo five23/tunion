@@ -17,43 +17,200 @@
     </header>
     <main id="gui">
       <canvas id="view1" width="600" height="300"></canvas>
-
-      <div id="vco1" class="fieldset">
-        <div nexus-ui="dial" id="frequency"></div>
-        <div nexus-ui="dial" id="harmonics"></div>
-        <div nexus-ui="dial" id="amplitude"></div>
-        <div nexus-ui="dial" id="phaseMod"></div>
-        <div nexus-ui="dial" id="freqMod"></div>
-      </div>
-
-      <div id="vco2" class="fieldset">
-        <div nexus-ui="dial" id="frequency"></div>
-        <div nexus-ui="dial" id="harmonics"></div>
-        <div nexus-ui="dial" id="amplitude"></div>
-        <div nexus-ui="dial" id="phaseMod"></div>
-        <div nexus-ui="dial" id="freqMod"></div>
-      </div>
-
-      <div id="vco3" class="fieldset">
-        <div nexus-ui="dial" id="frequency"></div>
-        <div nexus-ui="dial" id="harmonics"></div>
-        <div nexus-ui="dial" id="amplitude"></div>
-        <div nexus-ui="dial" id="phaseMod"></div>
-        <div nexus-ui="dial" id="freqMod"></div>
-      </div>
+      <div id="vco1"></div>        
     </main>
 <div id="editor">
+var K = window.K;
+var fs = 44100; // Process Sampling Frequency
+var fc = 440; // Center frequency
+var z1 = 0.998; // Lowpass Filter Pole (for smoothing controller changes)
+var omega = (K.TAU * fc) / fs; // Angular frequency
+
+var PRECISION = 32; /* Precision (in powers of 2) */
+
+var GAMMA  = 0.5772156649015328606065120900824; /* @constant {Number} Euler-Mascheroni constant */
+var TAU    = 6.2831853071795864769252867665590; /* @constant {Number} 2*pi */
+var PI     = 3.1415926535897932384626433832795; /* @constant {Number} pi */
+var ZETA2  = 1.6449340668482264364724151666460; /* @constant {Number} zeta(2) */
+var TWOLN2 = 1.3862943611198906188344642429164; /* @constant {Number} 2*ln(2) */
+
+/* abs(ζ(1 - floor(2 k))) | Mathematica: Table[Abs[Zeta[1 - Floor[2 k]]], {k, 1, 13}] */
+var B2 = [1/12, 1/120, 1/252, 1/240, 1/132, 691/32760, 1/12, 3617/8160, 43867/14364, 174611/6600, 77683/276, 236364091/65520, 657931/12];
+
+var vcaTheta, vcaOutput, vcaPhase, vcaPostGain, vcaPreGain, vcaHarmonics;
+
+window.position = window.position || new NexusUI.Position('#vco1',{
+  'size': [200,200],
+  'mode': 'absolute',  // "absolute" or "relative"
+  'x': 0.5,  // initial x value
+  'minX': 0,
+  'maxX': 1,
+  'stepX': 0.00005,
+  'y': 0.5,  // initial y value
+  'minY': 0,
+  'maxY': 1,
+  'stepY': 0.00005
+});
+
+window.vcoX = 0;
+window.vcoY = 0;
+
+window.position.on('change', (e) => { window.vcoX = e.x; window.vcoY = e.y; });
+
+
 function process(a) {
   // Loop through sample buffer
   for (var t = 0; t < a.length; ++t) {
+    vcaTheta += window.vcoX;
+
+    vcaOutput = 0.25 * Math.sin(vcaTheta * omega);
 
     // Fill buffer at time=t
-    a[t] = 0.5 * Math.random();
+    a[t] = 0.25 * vcaOutput;
   }
   
   // Return buffer
   return a;
 };
+
+
+// Single LPF, suitable for controller changes
+function lowpass(x, n, z) {
+  return x + (n - x) * z;
+}
+
+function digamma(x) {
+  var v = 0;
+  
+  /* If the absolute value of x is less than epsilon we assume zero */
+  /* TODO: this should return Complex Infinity */   
+  if (Math.abs(x) < Number.EPSILON) {      
+    return Infinity;
+  }
+  /* For negative integers we return Infinity */
+  /* TODO: this should return Complex Infinity */
+  if (Number.isInteger(x) && x < 0) {
+    return Infinity;
+  }
+  /* Special values (1) */
+  if (x === 1) {
+    return -GAMMA;
+  }
+  /* Special values (1/2) */
+  if (x === 1/2) {
+    return -GAMMA - TWOLOG2;
+  }
+  /* Small values (0.000001) */
+  if (Math.abs(x) <= 1e-6) {
+    /* Positive x */
+    if (x > 0) {
+        return GAMMA - 1 / x + ZETA2;
+    }
+    /* Negative x */
+    if (x < 0) {
+        return digamma(1 - x) + PI / Math.tan(-PI * x);
+    }
+  }
+
+  for (; PRECISION > x; x += 1) {
+    v -= 1.0 / x;
+  }
+
+  return (v +=
+    Math.log(x) -
+    0.5 / (x *= x) -
+    (B2[0] -
+      (B2[1] -
+        (B2[2] -
+          (B2[3] -
+            (B2[4] -
+              (B2[5] -
+                (B2[6] -
+                  (B2[7] -
+                    (B2[8] -
+                      (B2[9] - (B2[10] - (B2[11] - B2[12] / x) / x) / x) / x) /
+                      x) /
+                    x) /
+                  x) /
+                x) /
+              x) /
+            x) /
+          x) /
+        x) /
+      x);
+};
+
+function square(x, m) {
+  var a = TAU * m * Math.cos(x);
+  var b = Math.cos(TAU * a);
+  var c = digamma(0.75 - a) - digamma(0.25 - a);
+  return 0.5 * (b * c - PI);
+}
+
+function sawtooth(x, m) {
+  return Math.sin(x) * square(x, m);
+}
+
+function triangle(x, m) {
+  return sawtooth(x, m) * square(x, m);
+}  
+
+// Delay (via opendsp)
+function Delay(size) {
+  if (!(this instanceof Delay)) return new Delay(size);
+  size = size || 16384;
+  this.buffer = new Float32Array(size);
+  this.size = size;
+  this.counter = 0;
+  this._feedback = 0.5;
+  this._delay = 16384;
+}
+
+Delay.prototype.feedback = function (n) {
+  this._feedback = n;
+  return this;
+};
+
+Delay.prototype.delay = function (n) {
+  this._delay = n;
+  return this;
+};
+
+Delay.prototype.run = function (inp) {
+  var back = this.counter - this._delay;
+  if (back < 0) back = this.size + back;
+  var index0 = Math.floor(back);
+
+  var index_1 = index0 - 1;
+  var index1 = index0 + 1;
+  var index2 = index0 + 2;
+
+  if (index_1 < 0) index_1 = this.size - 1;
+  if (index1 >= this.size) index1 = 0;
+  if (index2 >= this.size) index2 = 0;
+
+  var y_1 = this.buffer[index_1];
+  var y0 = this.buffer[index0];
+  var y1 = this.buffer[index1];
+  var y2 = this.buffer[index2];
+
+  var x = back - index0;
+
+  var c0 = y0;
+  var c1 = 0.5 * (y1 - y_1);
+  var c2 = y_1 - 2.5 * y0 + 2.0 * y1 - 0.5 * y2;
+  var c3 = 0.5 * (y2 - y_1) + 1.5 * (y0 - y1);
+
+  var out = ((c3 * x + c2) * x + c1) * x + c0;
+
+  this.buffer[this.counter] = inp + out * this._feedback;
+
+  this.counter++;
+
+  if (this.counter >= this.size) this.counter = 0;
+
+  return out;
+};      
 </div>
 </body>
 </html>

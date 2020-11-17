@@ -17,7 +17,11 @@ import "ace-builds/src-noconflict/mode-javascript";
 
 import jsWorkerUrl from "file-loader!ace-builds/src-noconflict/worker-javascript";
 
+var K = new kMath();
 var audiopen;
+
+window.K = K;
+window.NexusUI = NexusUI;
 
 /**
  * onload
@@ -62,7 +66,7 @@ function AudioPen() {
   this.editorToggle;
   this.analyser;
   this.analyserView;
-  this.apiFunctionNames = ["process", "digamma"];
+  this.apiFunctionNames = ["process", "kMath"];
   this.isPlaying = false;
   this.compiledCode = null;
   this.lastCodeChangeTime = 0;
@@ -78,7 +82,6 @@ AudioPen.prototype = {
     var self = this;
 
     this.initGui();
-
     this.compileCode();
 
     this.channelCount = 2;
@@ -112,12 +115,8 @@ AudioPen.prototype = {
 
   initGui: function () {
     var self = this;
-    this.editorToggle = NexusUI.Add.Toggle("#header-panel");
-
-    this.vco1 = new NexusUI.Rack("#vco1");
-    this.vco2 = new NexusUI.Rack("#vco1");
-    this.vco3 = new NexusUI.Rack("#vco1");
-
+    this.editorToggle = window.NexusUI.Add.Toggle("#header-panel");
+  
     this.editorToggle.on("change", function (v) {
       if (v) {
         document.getElementById("editor").className =

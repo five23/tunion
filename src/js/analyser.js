@@ -60,7 +60,7 @@ export function create3DDebugContext(context) {
  */
 export function AnalyserView(canvasElementID) {
   this.canvasElementID = canvasElementID;
-  this.analysisType = ANALYSISTYPE_3D_SONOGRAM;
+  this.analysisType = ANALYSISTYPE_FREQUENCY;
   this.sonogram3DWidth = 256;
   this.sonogram3DHeight = 256;
   this.sonogram3DGeometrySize = 10;
@@ -102,8 +102,9 @@ AnalyserView.prototype.initGL = function () {
   // If we're missing this shader feature, then we can't do the 3D visualization.
   this.has3DVisualizer = gl.getParameter(gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS) > 0;
 
-  if (!this.has3DVisualizer && this.analysisType == ANALYSISTYPE_3D_SONOGRAM)
+  if (!this.has3DVisualizer && this.analysisType == ANALYSISTYPE_3D_SONOGRAM) {
     this.analysisType = ANALYSISTYPE_FREQUENCY;
+  }
 
   var cameraController = new CameraController(canvas);
   this.cameraController = cameraController;
