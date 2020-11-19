@@ -19,83 +19,139 @@
       <canvas id="view1" width="600" height="300"></canvas>
       <div id="vco1"></div>        
       <div id="vco2"></div>
+      <div id="vco3"></div>        
+      <div id="vco4"></div>
     </main>
-<div id="editor">
-  
-  
-  var fs = 44100; // Process Sampling Frequency
-  var fc = 440; // Center frequency
-  var z1 = 0.998; // Lowpass Filter Pole (for smoothing controller changes)
-  
-  var omega = (K.TAU * fc) / fs; // Angular frequency
-  
-  var vco1 = {
-      step: 0,
-      theta: 0,
-      N: 0,
-      out: 0
-  }
-  
-  var vco2 = {
-    step: 0,
-    theta: 0,
-    N: 0,
-    out: 0
+<div id="editor">var fs = 44100; // Process Sampling Frequency
+var fc = 440; // Center frequency
+var z1 = 0.998; // Lowpass Filter Pole (for smoothing controller changes)
+
+var omega = (K.TAU * fc) / fs; // Angular frequency
+
+var vco1 = {
+  step: 0,
+  theta: 0,
+  N: 0,
+  out: 0,
+};
+
+var vco2 = {
+  step: 0,
+  theta: 0,
+  N: 0,
+  out: 0,
+};
+
+var vco3 = {
+  step: 0,
+  theta: 0,
+  N: 0,
+  out: 0,
+};
+
+var vco4 = {
+  step: 0,
+  theta: 0,
+  N: 0,
+  out: 0,
+};
+
+function process(buffer) {
+  // Loop through sample buffer
+  for (var t = 0; t < buffer.length; ++t) {
+    vco1.step = lowpass(window.pos1._x.value, vco1.step, z1);
+    vco1.N = lowpass(window.pos1._y.value, vco1.N, z1);
+    vco1.theta += vco1.step;
+
+    vco2.step = lowpass(window.pos2._x.value, vco2.step, z1);
+    vco2.N = lowpass(window.pos2._y.value, vco2.N, z1);
+    vco2.theta += vco2.step;
+
+    vco3.step = lowpass(window.pos3._x.value, vco3.step, z1);
+    vco3.N = lowpass(window.pos3._y.value, vco3.N, z1);
+    vco3.theta += vco3.step;
+
+    vco4.step = lowpass(window.pos4._x.value, vco4.step, z1);
+    vco4.N = lowpass(window.pos4._y.value, vco4.N, z1);
+    vco4.theta += vco4.step;
+
+    vco1.out = 0.25 * K.square12(vco1.theta * omega, vco1.N * 4);
+    vco2.out = 0.25 * K.square12(vco2.theta * omega, vco2.N * 4);
+
+    vco3.out = 0.25 * K.square12(vco3.theta * omega, vco3.N * 4);
+    vco4.out = 0.25 * K.square12(vco4.theta * omega, vco4.N * 4);
+
+    buffer[t] = 0.25 * (vco1.out + vco2.out + vco3.out + vco4.out);
   }
 
-  function process(buffer) {
-    
-    // Loop through sample buffer
-    for (var t = 0; t < buffer.length; ++t) {
-        
-        vco1.step = lowpass(window.pos1._x.value, vco1.step, z1);
-        vco1.N = lowpass(window.pos1._y.value, vco1.N, z1);
-        vco1.theta += vco1.step;
+  // Return buffer
+  return buffer;
+}
 
-        vco2.step = lowpass(window.pos2._x.value, vco2.step, z1);
-        vco2.N = lowpass(window.pos2._y.value, vco2.N, z1);
-        vco2.theta += vco2.step;
-
-        vco1.out = 0.25 * K.square12(vco1.theta * omega, vco1.N * 4);
-        vco2.out = 0.25 * K.square12(vco2.theta * omega, vco2.N * 4);
-        
-        buffer[t] = 0.25 * (vco1.out + vco2.out);
-    }
-    
-    // Return buffer
-    return buffer;
-  }
-  
-  window.pos1 = window.pos1 || new NexusUI.Position('#vco1',{
-    'size': [200,200],
-    'mode': 'absolute',
-    'x': 0.0,
-    'minX': 0,
-    'maxX': 1,
-    'stepX': 0.00001,
-    'y': 0.0,
-    'minY': 0,
-    'maxY': 1,
-    'stepY': 0.00001
+window.pos1 =
+  window.pos1 ||
+  new NexusUI.Position("#vco1", {
+    size: [122, 122],
+    mode: "absolute",
+    x: 0.0,
+    minX: 0,
+    maxX: 1,
+    stepX: 0.00001,
+    y: 0.0,
+    minY: 0,
+    maxY: 1,
+    stepY: 0.00001,
   });
-  
-  window.pos2 = window.pos2 || new NexusUI.Position('#vco2',{
-    'size': [200,200],
-    'mode': 'absolute',
-    'x': 0.0,
-    'minX': 0,
-    'maxX': 1,
-    'stepX': 0.00001,
-    'y': 0.0,
-    'minY': 0,
-    'maxY': 1,
-    'stepY': 0.00001
+
+window.pos2 =
+  window.pos2 ||
+  new NexusUI.Position("#vco2", {
+    size: [122, 122],
+    mode: "absolute",
+    x: 0.0,
+    minX: 0,
+    maxX: 1,
+    stepX: 0.00001,
+    y: 0.0,
+    minY: 0,
+    maxY: 1,
+    stepY: 0.00001,
   });
 
-  // Single LPF, suitable for controller changes
-  function lowpass(x, n, z) {
-    return x + (n - x) * z;
-  }
+window.pos3 =
+  window.pos3 ||
+  new NexusUI.Position("#vco3", {
+    size: [122, 122],
+    mode: "absolute",
+    x: 0.0,
+    minX: 0,
+    maxX: 1,
+    stepX: 0.00001,
+    y: 0.0,
+    minY: 0,
+    maxY: 1,
+    stepY: 0.00001,
+  });
+
+window.pos4 =
+  window.pos4 ||
+  new NexusUI.Position("#vco4", {
+    size: [122, 122],
+    mode: "absolute",
+    x: 0.0,
+    minX: 0,
+    maxX: 1,
+    stepX: 0.00001,
+    y: 0.0,
+    minY: 0,
+    maxY: 1,
+    stepY: 0.00001,
+  });
+
+// Single LPF, suitable for controller changes
+function lowpass(x, n, z) {
+  return x + (n - x) * z;
+}  
 </div>
 </body>
 </html>
