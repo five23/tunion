@@ -1,11 +1,18 @@
+/**
+ * kMath
+ *
+ * @export
+ */
 export function kMath() {
 
     const self = this;
 
+    // Floating point constants (use with caution!)
+
     this.EPSILON = 2.2204460492503130808472633361816E-16;
 
     this.PHI = 1.61803398874989484820458683436564; // @constant {Number} (1+sqrt(5))/2
-    this.TAU = 6.28318530717958647692528676655901; // @constant {Number} 2*pi
+    this.TAU = 6.28318530717958647692528676655901; // @constant {Number} 2 pi
     this.PI2 = 1.57079632679489661923132169163975; // @constant {Number} pi/2
     this.GAMMA = 0.57721566490153286060651209008240; // @constant {Number} lim_(n->infty)(H_n-lnn)
     this.ZETA2 = 1.64493406684822643647241516664603; // @constant {Number} zeta(2)
@@ -19,6 +26,182 @@ export function kMath() {
     this.G3 = 0.16666666666666666666666666666667; // @constant {Number} 1/6
     this.G4 = 0.13819660112501051517954131656344; // @constant {Number} 1/(5 + sqrt(5))
     this.H2 = 0.57735026918962576450914878050196; // @constant {Number} 1/(sqrt(3))
+    this.TWOLN2 = 1.3862943611198906188344642429164; // @constant {Number} 2 ln(2)
+
+    
+    /**
+     * Get OEIS sequence by ID
+     *
+     * @param {*} id
+     * @returns {Array} of integers if sequence is found, false otherwise
+     */
+    this.getSequenceById = async (id) => {
+        const proxyurl = "https://cors-anywhere.herokuapp.com/"; // TODO: register @ OEIS
+        const url = `https://oeis.org/search?q=id:${id}&fmt=json`;
+        const response = await fetch(proxyurl + url);
+        const json = await response.json();
+        if (json.results.length) {
+            const results = json.results[0]; // Grab first sequence
+            const data = results.data; // Get sequence data
+            const array = data.split(","); // Explode
+            return array.map(el => parseInt(el)); // Return array of integers
+        }
+        return false;
+    }
+    
+    
+    /**
+     * Map an array of numerators to an array of denominators
+     *
+     * @param {Array} numerators
+     * @param {Array} denominators
+     * @returns {Array} of integers
+     */
+    this.mapNandD = (numerators, denominators) => numerators.map((numerator, i) => denominators[i]/numerator);
+
+
+    // @constant {Array} abs(ζ(1 - floor(2 k)))
+    this.B2 = [
+        1/12, 
+        1/120, 
+        1/252, 
+        1/240, 
+        1/132, 
+        691/32760, 
+        1/12, 
+        3617/8160, 
+        43867/14364, 
+        174611/6600, 
+        77683/276, 
+        236364091/65520, 
+        657931/12
+    ];
+
+    // @constant {Array} Numerators of harmonic numbers H(n) = Sum_{i=1..n} 1/i.
+    this.HN0 = [
+        1, 
+        3, 
+        11, 
+        25, 
+        137, 
+        49, 
+        363, 
+        761, 
+        7129, 
+        7381, 
+        83711, 
+        86021, 
+        1145993, 
+        1171733, 
+        1195757, 
+        2436559, 
+        42142223, 
+        14274301, 
+        275295799, 
+        55835135, 
+        18858053, 
+        19093197, 
+        444316699, 
+        1347822955,
+        34052522467, 
+        34395742267, 
+        312536252003, 
+        315404588903, 
+        9227046511387
+    ]
+    
+    // @constant {Array} Denominators of harmonic numbers H(n) = Sum_{i=1..n} 1/i  
+    this.HN1 = [
+        1, 
+        2, 
+        6, 
+        12, 
+        60,
+        20, 
+        140, 
+        280, 
+        2520, 
+        2520, 
+        27720, 
+        27720, 
+        360360, 
+        360360, 
+        360360, 
+        720720, 
+        12252240, 
+        4084080, 
+        77597520, 
+        15519504, 
+        5173168, 
+        5173168, 
+        118982864, 
+        356948592, 
+        8923714800, 
+        8923714800, 
+        80313433200, 
+        80313433200, 
+        2329089562800
+    ]
+
+    this.GAMMAINT = [
+        0, 
+        1, 
+        3/2, 
+        11/6, 
+        25/12, 
+        137/60, 
+        49/20, 
+        363/140, 
+        761/280, 
+        7129/2520, 
+        7381/2520, 
+        83711/27720
+    ];
+
+    this.GAMMAINT_TEST_VALUES = [ 
+        -0.5772156649015329, 
+        0.42278433509846713, 
+        0.9227843350984671, 
+        1.2561176684318003, 
+        1.5061176684318007, 
+        1.7061176684318005, 
+        1.8727843350984674, 
+        2.01564147795561,  
+        2.14064147795561, 
+        2.2517525890667214, 
+        2.351752589066721, 
+        2.4426616799758123 
+    ];
+
+    this.GAMMAHALFINT = [
+        0,
+        2,
+        46/15,
+        352/105,
+        1126/315,
+        13016/3465,
+        176138/45045,
+        182144/45045,
+        3186538/765765,
+        62075752/14549535,
+        63461422/14549535,
+        1488711776/334639305
+    ];
+
+    this.GAMMAHALFINT_TEST_VALUES = [ 
+        -1.9635100260214235, 
+        0.03648997397857652, 
+        0.7031566406452432, 
+        1.103156640645243, 
+        1.388870926359529, 
+        1.611093148581751, 
+        1.792911330399933, 
+        1.9467574842460866, 
+        2.08009081757942, 
+        2.1977378764029494, 
+        2.303001034297686, 
+        2.398239129535781
+    ];
 
 
     /*
@@ -233,6 +416,18 @@ export function kMath() {
 
 
     /*
+     * Square Wave Approximation
+     *
+     * @param {Number} x
+     * @param {Number} m Partials
+     * @returns {x}
+     */
+    this.square12 = (a, b) => {
+        return 0.5 * (Math.cos(self.TAU * b * Math.cos(a)) * ((self.digamma12(0.75 - b * Math.cos(a)) - self.digamma12(0.25 - b * Math.cos(a))) / Math.PI) - 1);
+    };
+
+
+    /*
      * Factorial
      *
      * @param {Number} x
@@ -350,7 +545,6 @@ export function kMath() {
      * @param {Number} x
      * @returns {x}
      */
-     // Input 0
    this.digamma = b => {
      let c = 0;
      if (0 >= b && b === Math.round(b)) {
@@ -367,7 +561,80 @@ export function kMath() {
      }
      return c += Math.log(b) - 0.5 / (b *= b) - (0.08333333333333333 - (0.008333333333333333 - (0.0039682539682539 - (0.004166666666666 - 1 / (132 * b)) / b) / b) / b) / b;
    };
+   
 
+   
+    /*
+     * Precision Digamma Function
+     *
+     * @param {Number} x
+     * @returns {x}
+     */
+   this.digamma12 = (x, PRECISION) => {
+
+    // Defaults to 12, est. max ~32678*12
+    if (!PRECISION) {
+        PRECISION = 12;
+    }
+    var v = 0;
+    
+    /* If the absolute value of x is less than epsilon we assume zero */
+    /* TODO: this should return Complex Infinity */   
+    if (Math.abs(x) < Number.EPSILON) {      
+      return Infinity;
+    }
+    /* For negative integers we return Infinity */
+    /* TODO: this should return Complex Infinity */
+    if (Number.isInteger(x) && x < 0) {
+      return Infinity;
+    }
+    /* Special values at positive integers (table lookup) */
+    if (Number.isInteger(x) && x < 12) {
+        return self.GAMMAINT[x-1] - self.GAMMA;
+    }
+    /* Special values at positive half-integers (table lookup) */
+    if (Number.isInteger(x-1/2) && x < 25/2) {
+        return self.GAMMAHALFINT[x-1/2] - self.GAMMA - self.TWOLN2;
+    }
+    /* Small values (0.000001) */
+    if (Math.abs(x) <= 1e-6) {
+      /* Positive x */
+      if (x > 0) {
+          return self.GAMMA - 1 / x + self.ZETA2;
+      }
+      /* Negative x */
+      if (x < 0) {
+          return self.digamma12(1 - x) + self.PI / Math.tan(-self.PI * x);
+      }
+    }
+  
+    for (; PRECISION > x; x += 1) {
+      v -= 1.0 / x;
+    }
+  
+    return (v +=
+      Math.log(x) -
+      0.5 / (x *= x) -
+      (self.B2[0] -
+        (self.B2[1] -
+          (self.B2[2] -
+            (self.B2[3] -
+              (self.B2[4] -
+                (self.B2[5] -
+                  (self.B2[6] -
+                    (self.B2[7] -
+                      (self.B2[8] -
+                        (self.B2[9] - (self.B2[10] - (self.B2[11] - self.B2[12] / x) / x) / x) / x) /
+                        x) /
+                      x) /
+                    x) /
+                  x) /
+                x) /
+              x) /
+            x) /
+          x) /
+        x);
+    }
 
     /*
      * Harmonic Number
@@ -377,6 +644,14 @@ export function kMath() {
      */
     this.H = x => self.digamma(++x) + self.GAMMA;
 
+
+    /*
+     * Precision Harmonic Number
+     *
+     * @param {Number} x
+     * @returns {x}
+     */
+    this.H12 = x => self.digamma12(++x) + self.GAMMA;
 
     /*
      * Phi Distribution

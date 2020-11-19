@@ -17,36 +17,23 @@ import "ace-builds/src-noconflict/mode-javascript";
 
 import jsWorkerUrl from "file-loader!ace-builds/src-noconflict/worker-javascript";
 
-var K = new kMath();
-var audiopen;
-
-window.K = K;
-window.NexusUI = NexusUI;
-
 /**
  * onload
- *
  */
-window.onload = () => {
-  audiopen = new AudioPen();
-  if (navigator.mediaDevices) {
-    console.log("getUserMedia supported.");
-    navigator.mediaDevices
-      .getUserMedia({
-        audio: true,
-        video: false,
-      })
-      .then((stream) => {
-        audiopen.start(stream);
-      })
-      .catch((err) => {
-        console.log(`The following gUM error occured: ${err}`);
-      });
-  } else {
-    console.log("getUserMedia not supported on your browser!");
-  }
+window.onload = function () {
+  var audiopen = new AudioPen();
+
+  self.K = new kMath();
+  self.NexusUI = NexusUI;
+  
+  audiopen.start();
 };
 
+/**
+ * AudioPenAPI
+ *
+ * @param {*} a
+ */
 function AudioPenAPI(a) {
   var core = a;
   this.sampleRate = function () {
@@ -55,8 +42,7 @@ function AudioPenAPI(a) {
 }
 
 /**
- *
- *
+ * AudioPen
  */
 function AudioPen() {
   this.vco1;
@@ -73,21 +59,23 @@ function AudioPen() {
   this.lastCompilationTime = 0;
   this.compilationDelay = 1e3;
   this.sampleRate = 44100;
-  this.bufferSize = 4096;
+  this.bufferSize = 2048;
   this.t = 0;
 }
 
 AudioPen.prototype = {
-  start: function (stream) {
+  /**
+   * start
+   */
+  start: function () {
     var self = this;
 
     this.initGui();
     this.compileCode();
 
-    this.channelCount = 2;
+    this.channelCount = 1;
     this.audioContext = new (window.AudioContext ||
       window.webkitAudioContext)();
-    this.streamNode = this.audioContext.createMediaStreamSource(stream);
     this.gainNode = this.audioContext.createGain();
     this.scriptNode = this.audioContext.createScriptProcessor(
       this.bufferSize,
@@ -98,7 +86,6 @@ AudioPen.prototype = {
       self.executeCode(audioProcessingEvent);
     };
 
-    this.streamNode.connect(this.scriptNode);
     this.analyser = this.audioContext.createAnalyser();
     this.analyser.fftSize = 2048;
     this.analyser.smoothingTimeConstant = 0.3;
@@ -113,10 +100,13 @@ AudioPen.prototype = {
     this.mainLoop();
   },
 
+  /**
+   * initGui
+   */
   initGui: function () {
     var self = this;
     this.editorToggle = window.NexusUI.Add.Toggle("#header-panel");
-  
+
     this.editorToggle.on("change", function (v) {
       if (v) {
         document.getElementById("editor").className =
@@ -138,9 +128,9 @@ AudioPen.prototype = {
   },
 
   /**
+   * compileCode
    *
-   *
-   * @return {*}
+   * @returns
    */
   compileCode: function () {
     var code = this.editor.getValue();
@@ -166,10 +156,10 @@ AudioPen.prototype = {
   },
 
   /**
+   * executeCode
    *
-   *
-   * @param {*} buffer
-   * @return {*}
+   * @param {*} audioProcessingEvent
+   * @returns
    */
   executeCode: function (audioProcessingEvent) {
     var buffer = audioProcessingEvent.outputBuffer.getChannelData(0);
@@ -178,8 +168,7 @@ AudioPen.prototype = {
   },
 
   /**
-   *
-   *
+   * mainLoop
    */
   mainLoop: function () {
     var self = this;
