@@ -58,8 +58,8 @@ export function create3DDebugContext(context) {
  *
  * @param {*} canvasElementID
  */
-export function AnalyserView(canvasElementID) {
-  this.canvasElementID = canvasElementID;
+export function AnalyserView(properties) {  
+  this.canvasElementID = properties.canvasElementID;
   this.analysisType = ANALYSISTYPE_FREQUENCY;
   this.sonogram3DWidth = 256;
   this.sonogram3DHeight = 256;

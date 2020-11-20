@@ -17,47 +17,134 @@ import "ace-builds/src-noconflict/mode-javascript";
 
 import jsWorkerUrl from "file-loader!ace-builds/src-noconflict/worker-javascript";
 
+
 /**
  * onload
  */
 window.onload = function () {
-  var audiopen = new AudioPen();
 
-  self.K = new kMath();
   self.NexusUI = NexusUI;
+  self.K = new kMath();
+  self.audiopen = new AudioPen();  
+    
+  self.vco1 = {
+    step: 0,
+    theta: 0,
+    N: 0,
+    out: 0,
+  };
+
+  self.vco2 = {
+    step: 0,
+    theta: 0,
+    N: 0,
+    out: 0,
+  };
+
+  self.vco3 = {
+    step: 0,
+    theta: 0,
+    N: 0,
+    out: 0,
+  };
+
+  self.vco4 = {
+    step: 0,
+    theta: 0,
+    N: 0,
+    out: 0,
+  };
+
+  self.view1sel = new NexusUI.Select('#view1sel',{
+    'size': [100, 30],
+    'options': ['freq','sono', '3dsono', 'wave']
+  });
+
+  view1sel.on('change', function(v) {
+    audiopen.analyserView.setAnalysisType(v.index);
+  })
+
+  self.vco1pos = new NexusUI.Position("#vco4pos", {
+    size: [122, 122],    
+    x: 0.0,
+    minX: 0,
+    maxX: 1,
+    stepX: 0.00001,
+    y: 0.0,
+    minY: 0,
+    maxY: 1,
+    stepY: 0.00001,
+  });
+
+  self.vco2pos = new NexusUI.Position("#vco4pos", {
+    size: [122, 122],    
+    x: 0.0,
+    minX: 0,
+    maxX: 1,
+    stepX: 0.00001,
+    y: 0.0,
+    minY: 0,
+    maxY: 1,
+    stepY: 0.00001,
+  });
+
+  self.vco3pos = new NexusUI.Position("#vco4pos", {
+    size: [122, 122],    
+    x: 0.0,
+    minX: 0,
+    maxX: 1,
+    stepX: 0.00001,
+    y: 0.0,
+    minY: 0,
+    maxY: 1,
+    stepY: 0.00001,
+  });
+
+  self.vco4pos = new NexusUI.Position("#vco4pos", {
+    size: [122, 122],    
+    x: 0.0,
+    minX: 0,
+    maxX: 1,
+    stepX: 0.00001,
+    y: 0.0,
+    minY: 0,
+    maxY: 1,
+    stepY: 0.00001,
+  });
+
+  self.vco1sld = new NexusUI.Multislider('#vco1sld',{
+    'size': [122, 61],
+    'numberOfSliders': 4,
+    'min': 0,
+    'max': 1,
+    'step': 0,
+    'candycane': 3,
+    'values': [0.9,0.8,0.7,0.6,0.5,0.4,0.3,0.2,0.1],
+    'smoothing': 0,
+    'mode': 'bar'  // 'bar' or 'line'
+  });
   
+
   audiopen.start();
 };
 
-/**
- * AudioPenAPI
- *
- * @param {*} a
- */
-function AudioPenAPI(a) {
-  var core = a;
-  this.sampleRate = function () {
-    return core.sampleRate;
-  };
-}
 
 /**
  * AudioPen
  */
 function AudioPen() {
-  this.vco1;
-  this.vco2;
-  this.vco3;
   this.editor;
   this.editorToggle;
   this.analyser;
-  this.analyserView;
-  this.apiFunctionNames = ["process", "kMath"];
+  this.analyserView = new AnalyserView({
+    canvasElementID: "view1crt"
+  });
+  this.apiFunctionNames = ["process"];
   this.isPlaying = false;
   this.compiledCode = null;
-  this.lastCodeChangeTime = 0;
-  this.lastCompilationTime = 0;
-  this.compilationDelay = 1e3;
+  this.codeLastChanged = 0;
+  this.codeLastCompiled = 0;
+  this.compilationDelay = 1e2;
   this.sampleRate = 44100;
   this.bufferSize = 2048;
   this.t = 0;
@@ -70,10 +157,10 @@ AudioPen.prototype = {
   start: function () {
     var self = this;
 
-    this.initGui();
+    this.initRack();
     this.compileCode();
 
-    this.channelCount = 1;
+    this.channelCount = 2;
     this.audioContext = new (window.AudioContext ||
       window.webkitAudioContext)();
     this.gainNode = this.audioContext.createGain();
@@ -87,26 +174,22 @@ AudioPen.prototype = {
     };
 
     this.analyser = this.audioContext.createAnalyser();
-    this.analyser.fftSize = 2048;
-    this.analyser.smoothingTimeConstant = 0.3;
-    this.scriptNode.connect(this.gainNode);
-    this.gainNode.connect(this.audioContext.destination);
-    this.gainNode.connect(this.analyser);
-    this.gainNode.gain.setValueAtTime(0.5, this.audioContext.currentTime);
 
-    this.analyserView = new AnalyserView("view1");
-    this.analyserView.initByteBuffer(this.analyser);
-    this.amplitudeData = new Uint8Array(this.analyser.frequencyBinCount);
+    this.scriptNode.connect(self.analyser);
+    this.scriptNode.connect(self.audioContext.destination);
+    this.analyserView.initByteBuffer(self.analyser);
+    this.amplitudeData = new Uint8Array(self.analyser.frequencyBinCount);
     this.mainLoop();
   },
 
   /**
-   * initGui
+   * initRack
    */
-  initGui: function () {
+  initRack: function () {
     var self = this;
-    this.editorToggle = window.NexusUI.Add.Toggle("#header-panel");
 
+    this.editorToggle = NexusUI.Add.Toggle("#header-panel");
+    
     this.editorToggle.on("change", function (v) {
       if (v) {
         document.getElementById("editor").className =
@@ -123,7 +206,7 @@ AudioPen.prototype = {
     this.editor.setShowPrintMargin(false);
     this.editor.getSession().setMode("ace/mode/javascript");
     this.editor.on("change", function (e) {
-      self.lastCodeChangeTime = Date.now();
+      self.codeLastChanged = Date.now();
     });
   },
 
@@ -143,7 +226,7 @@ AudioPen.prototype = {
     }
     var appendix = "\nreturn {" + memberDefs.join(",") + " };";
     code += appendix;
-    this.lastCompilationTime = Date.now();
+    this.codeLastCompiled = Date.now();
     var pack = null;
     try {
       pack = new Function(code)();
@@ -162,9 +245,10 @@ AudioPen.prototype = {
    * @returns
    */
   executeCode: function (audioProcessingEvent) {
+    var self = this;
     var buffer = audioProcessingEvent.outputBuffer.getChannelData(0);
-    if (buffer === null) return;
     buffer = this.compiledCode.process(buffer);
+    this.analyserView.doFrequencyAnalysis(self.analyser);
   },
 
   /**
@@ -176,12 +260,10 @@ AudioPen.prototype = {
       self.mainLoop();
     });
     if (
-      Date.now() - this.lastCodeChangeTime > this.compilationDelay &&
-      this.lastCodeChangeTime > this.lastCompilationTime
-    )
+      Date.now() - this.codeLastChanged > this.compilationDelay &&
+      this.codeLastChanged > this.codeLastCompiled
+    ) {
       this.compileCode();
-    if (this.compiledCode.onGui) this.compiledCode.onGui();
-    this.analyser.getByteTimeDomainData(this.amplitudeData);
-    this.analyserView.doFrequencyAnalysis(this.analyser);
+    }
   },
 };

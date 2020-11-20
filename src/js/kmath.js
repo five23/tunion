@@ -33,7 +33,7 @@ export function kMath() {
      * Get OEIS sequence by ID
      *
      * @param {*} id
-     * @returns {Array} of integers if sequence is found, false otherwise
+     * @return {Array} of integers if sequence is found, false otherwise
      */
     this.getSequenceById = async (id) => {
         const proxyurl = "https://cors-anywhere.herokuapp.com/"; // TODO: register @ OEIS
@@ -55,7 +55,7 @@ export function kMath() {
      *
      * @param {Array} numerators
      * @param {Array} denominators
-     * @returns {Array} of integers
+     * @return {Array} of integers
      */
     this.mapNandD = (numerators, denominators) => numerators.map((numerator, i) => denominators[i]/numerator);
 
@@ -204,29 +204,29 @@ export function kMath() {
     ];
 
 
-    /*
+    /**
      * csc
      *
      * @param {Number} x
-     * @returns {x}
+     * @return {Number}
      */
     this.csc = x => 1.0 / Math.sin(x);
 
 
-    /*
+    /**
      * sinh
      *
      * @param {Number} x
-     * @returns {x}
+     * @return {Number}
      */
     this.cosh = x => 0.5 * (Math.exp(x) + Math.exp(-x));
 
 
-    /*
+    /**
      * sinh
      *
      * @param {Number} x
-     * @returns {x}
+     * @return {Number}
      */
     this.sinh = c => {
         let d;
@@ -255,65 +255,65 @@ export function kMath() {
     };
 
 
-    /*
+    /**
      * tanh
      *
      * @param {Number} x
-     * @returns {x}
+     * @return {Number}
      */
     this.tanh = x => (Math.exp(x) - Math.exp(-x)) / (Math.exp(x) + Math.exp(-x));
 
 
-    /*
+    /**
      * csch
      *
      * @param {Number} x
-     * @returns {x}
+     * @return {Number}
      */
     this.csch = x => 2 / (Math.exp(x) - Math.exp(-x));
 
 
-    /*
+    /**
      * acoth
      *
      * @param {Number} x
-     * @returns {x}
+     * @return {Number}
      */
     this.coth = x => 1 / self.tanh(x);
 
 
-    /*
+    /**
      * acosh
      *
      * @param {Number} x
-     * @returns {x}
+     * @return {Number}
      */
     this.acosh = x => Math.log(x + Math.sqrt(x * x - 1));
 
 
-    /*
+    /**
      * asinh
      *
      * @param {Number} x
-     * @returns {x}
+     * @return {Number}
      */
     this.asinh = x => Math.log(x + Math.sqrt(x * x + 1));
 
 
-    /*
+    /**
      * atanh
      *
      * @param {Number} x
-     * @returns {x}
+     * @return {Number}
      */
     this.atanh = x => 0.5 * Math.log((1 + x) / (1 - x));
 
 
-    /*
+    /**
      * Fast Sine Approximation
      *
      * @param {Number} x
-     * @returns {x}
+     * @return {Number}
      */
     this.fsin = x => {
         let b;
@@ -324,11 +324,11 @@ export function kMath() {
     };
 
 
-    /*
+    /**
      * Fast Cosine Approximation
      *
      * @param {Number} x
-     * @returns {x}
+     * @return {Number}
      */
     this.fcos = (a, b) => {
         a = 8192 - 5215.19 * a, b = a << 17, a = a - 8192 << 18 >> 18, a = 4096 - ((a * a >> 12) * (19900 - (3516 * (a * a >> 12) >> 14)) >> 16);
@@ -336,102 +336,117 @@ export function kMath() {
     };
 
 
-    /*
+    /**
      * Unit Step
      *
      * @param {Number} x
-     * @returns {x}
+     * @return {Number}
      */
     this.unitstep = x => (x >= 0) ? (x ? 1 : 0.5) : 0;
 
 
-    /*
+    /**
      * Dirac Delta
      *
      * @param {Number} x
-     * @returns {x}
+     * @return {Number}
      */
     this.diracdelta = x => (x === 0) ? Infinity : 0;
 
 
-    /*
+    /**
      * Kronecker Delta
      *
      * @param {Number} i
      * @param {Number} j
-     * @returns {x}
+     * @return {Number}
      */
     this.kroneckerdelta = (i, j) => (i === j) ? 1 : 0;
 
 
-    /*
+    /**
      * Sgn
      *
      * @param {Number} x
-     * @returns {x}
+     * @return {Number}
      */
     this.sgn = x => typeof x === 'number' ? x ? x < 0 ? -1 : 1 : x === x ? 0 : NaN : NaN;
 
 
-    /*
+    /**
      * Sinc
      *
      * @param {Number} x
-     * @returns {x}
+     * @return {Number}
      */
     this.sinc = x => (x === 0) ? 1 : Math.sin(Math.PI * x) / (Math.PI * x);
 
 
-    /*
+    /**
      * Triangle (naive)
      *
      * @param {Number} x
-     * @returns {x}
+     * @return {Number}
      */
     this.triangle = x => x - Math.floor(x);
 
 
-    /*
+    /**
      * Mod
      *
      * @param {Number} x
      * @param {Number} y
-     * @returns {x}
+     * @return {Number}
      */
     this.mod = (x, y) => x - Math.floor(x / y) * y;
 
 
-    /*
-     * Square Wave Approximation
+    /**
+     * Precision Square Wave Approximation
      *
-     * @param {Number} x
-     * @param {Number} m Partials
-     * @returns {x}
+     * @param {Number} a
+     * @param {Number} b Partials
+     * @return {Number}
      */
-     this.square = (a, b) => {
-       b *= self.TAU;
-       a = 440 * a * self.TAU / 48000;
-       return 0.5 * (Math.cos(self.TAU * b * Math.cos(a)) * ((self.digamma(0.75 - b * Math.cos(a)) - self.digamma(0.25 - b * Math.cos(a))) / Math.PI) - 1);
-     };
-
-
-    /*
-     * Square Wave Approximation
-     *
-     * @param {Number} x
-     * @param {Number} m Partials
-     * @returns {x}
-     */
-    this.square12 = (a, b) => {
-        return 0.5 * (Math.cos(self.TAU * b * Math.cos(a)) * ((self.digamma12(0.75 - b * Math.cos(a)) - self.digamma12(0.25 - b * Math.cos(a))) / Math.PI) - 1);
+    this.sqr12 = (a, b) => {
+        b *= self.TAU * b;
+        const v = Math.cos(self.TAU * b * Math.cos(a)) * ((self.digamma12(0.75 - b * Math.cos(a)) - self.digamma12(0.25 - b * Math.cos(a))) / Math.PI) - 1;
+        return 0.5 * v;
     };
 
 
-    /*
+    /**
+     * Precision Sawtooth Wave Approximation
+     *
+     * @param {Number} a
+     * @param {Number} b Partials
+     * @return {Number} 
+     */
+    this.saw12 = (a, b) => {
+        const v = Math.sin(a) * self.sqr12(a, b);
+        return 1.5 * v;
+    }
+
+    /**
+     * Precision Triangle Wave Approximation
+     * Note: it's a misnomer perhaps to call this a 'triangle' in the traditional sense,
+     * as the overall shape tends more towards a smooth waveform (and yet continues to 
+     * maintain subtractive properties like a sawtooth). Your mileage may vary.
+     *
+     * @param {Number} a
+     * @param {Number} b
+     * @return {Number} 
+     */
+    this.tri12 = (a, b) => {
+        const v = self.sqr12(a, b) * self.saw12(a, b);
+        return 3.0 * v;
+    }
+  
+    /**
      * Factorial
      *
      * @param {Number} x
-     * @returns {x}
+     * @return {Number}
      */
     this.factorial = x => {
 
@@ -454,11 +469,11 @@ export function kMath() {
     };
 
 
-    /*
+    /**
      * Log Gamma
      *
      * @param {Number} x
-     * @returns {x}
+     * @return {Number}
      */
     this.lngamma = x => {
         let v = 0;
@@ -513,11 +528,11 @@ export function kMath() {
     };
 
 
-    /*
+    /**
      * Gamma Function
      *
      * @param {Number} x
-     * @returns {x}
+     * @return {Number}
      */
     this.gamma = x => {
 
@@ -539,11 +554,11 @@ export function kMath() {
     };
 
 
-    /*
+    /**
      * Digamma Function
      *
      * @param {Number} x
-     * @returns {x}
+     * @return {Number}
      */
    this.digamma = b => {
      let c = 0;
@@ -564,11 +579,11 @@ export function kMath() {
    
 
    
-    /*
+    /**
      * Precision Digamma Function
      *
      * @param {Number} x
-     * @returns {x}
+     * @return {Number}
      */
    this.digamma12 = (x, PRECISION) => {
 
@@ -604,7 +619,7 @@ export function kMath() {
       }
       /* Negative x */
       if (x < 0) {
-          return self.digamma12(1 - x) + self.PI / Math.tan(-self.PI * x);
+          return self.digamma12(1 - x) + Math.PI / Math.tan(-Math.PI * x);
       }
     }
   
@@ -636,28 +651,28 @@ export function kMath() {
         x);
     }
 
-    /*
+    /**
      * Harmonic Number
      *
      * @param {Number} x
-     * @returns {x}
+     * @return {Number}
      */
     this.H = x => self.digamma(++x) + self.GAMMA;
 
 
-    /*
+    /**
      * Precision Harmonic Number
      *
      * @param {Number} x
-     * @returns {x}
+     * @return {Number}
      */
     this.H12 = x => self.digamma12(++x) + self.GAMMA;
 
-    /*
+    /**
      * Phi Distribution
      *
      * @param {Number} x
-     * @returns {x}
+     * @return {Number}
      */
     this.phi = x => {
 
@@ -669,11 +684,11 @@ export function kMath() {
     };
 
 
-    /*
+    /**
      * Fresnel C Function
      *
      * @param {Number} x
-     * @returns {x}
+     * @return {Number}
      */
     this.fresnelc = d => {
         d *= self.SQRT2PI / 2;
@@ -705,11 +720,11 @@ export function kMath() {
     };
 
 
-    /*
+    /**
      * Riemann Zeta Function
      *
      * @param {Number} x
-     * @returns {x}
+     * @return {Number}
      */
     this.zeta = b => {
         let a;
@@ -736,11 +751,11 @@ export function kMath() {
     };
 
 
-    /*
+    /**
      * Error function
      *
      * @param {Number} x
-     * @returns {x}
+     * @return {Number}
      */
     this.erf = a => {
 
@@ -754,10 +769,10 @@ export function kMath() {
     };
 
 
-    /*
+    /**
      * Machine epsilon
      *
-     * @returns {x}
+     * @return {Number}
      */
     this.epsilon = () => {
         let a = 1;
@@ -772,11 +787,11 @@ export function kMath() {
     };
 
 
-    /*
+    /**
      * Cantor "Devil's Staircase" Function
      *
      * @param {Number} x
-     * @returns {x}
+     * @return {Number}
      */
     this.cantor = x => {
         if (x <= 0) {
@@ -803,60 +818,75 @@ export function kMath() {
     };
 
 
-    /*
+    /**
      * Convert float to int
      *
      * @param {Number} x
-     * @returns {x} Integer
+     * @return {Number} Integer
      */
     this.int = x => x | 0;
 
 
-    /*
+    /**
      * Fast floor function
      *
      * @param {Number} x
-     * @returns {x}
+     * @return {Number}
      */
     this.floor32 = x => x < 0 ? (x | 0) - 1 : x | 0;
 
 
-    /*
+    /**
      * Calculates a number between two numbers at a specific increment.
      *
      * @param {Number} x
      * @param {Number} v0
      * @param {Number} v1
-     * @returns {Number}
+     * @return {Number}
      */
     this.lerp = (x, v0, v1) => v0 + (v1 - v0) * x;
 
 
-    /*
+    /**
+     * Most basic lowpass filter
+     * 
+     * Tip: for smoothing controller changes try z=0.998
+     *
+     * @param {Number} x
+     * @param {Number} n
+     * @param {Number} z
+     */
+    this.lpf = (x, n, z) => {
+        if (!z) z = 0.998;
+        return x + (n - x) * z;
+    };
+
+    
+    /**
      * Clamp a value to an interval
      *
      * @param {Number} x The value to clamp
      * @param {Number} v0 The lower clamp threshold
      * @param {Number} v1 The upper clamp threshold
-     * @returns {Number} The clamped value
+     * @return {Number} The clamped value
      */
     this.clamp = (x, v0, v1) => x < v0 ? v0 : x > v1 ? v1 : x;
 
 
-    /*
+    /**
      * Normalizes a value from a given range (min, max) into a value between -1.0 and 1.0
      *
      * @param {Number} x The value to normalize
      * @param {Number} v0 The minimum value of the normalization
      * @param {Number} v1 The maximum value of the normalization
-     * @returns {Number} The normalized value
+     * @return {Number} The normalized value
      */
     this.normalize = function(x, v0, v1) {
         return this.clamp((x - v0) / (v1 - v0), -1.0, 1.0);
     };
 
 
-    /*
+    /**
      * Re-maps a value from one range to another
      *
      * @param {Number} x The value to re-map
@@ -865,7 +895,7 @@ export function kMath() {
      * @param {Number} vx0 The minimum output value
      * @param {Number} vx1 The maximum output value
      * @param {Boolean} clamp Results if True
-     * @returns {Number} The re-mapped value
+     * @return {Number} The re-mapped value
      */
     this.map = (x, v0, v1, vx0, vx1, clamp) => {
         if (Math.abs(v0 - v1) < 1e-15) {
@@ -892,19 +922,19 @@ export function kMath() {
     };
 
 
-    /*
+    /**
      * Calculates distance between two points (Pythagorean Theorem)
      *
      * @param {Number} x1
      * @param {Number} y1
      * @param {Number} x2
      * @param {Number} y2
-     * @returns {Number}
+     * @return {Number}
      */
     this.dist = (x1, y1, x2, y2) => Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 
 
-    /*
+    /**
      * Calculates the distances between two points, as in dist()
      * but doesn't take the sqrt() of the result, which is a faster
      * operation if you need to calculate and compare multiple distances.
@@ -913,18 +943,18 @@ export function kMath() {
      * @param {Number} y1
      * @param {Number} x2
      * @param {Number} y2
-     * @returns {Number}
+     * @return {Number}
      */
     this.distSquared = (x1, y1, x2, y2) => (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);
 
 
-    /*
+    /**
      * Random float
      *
      * @param {Number} min
      * @param {Number} max
      * @param {Number} precision
-     * @returns {Number}
+     * @return {Number}
      */
     this.randomFloat = (min, max, precision) => {
 
@@ -936,23 +966,23 @@ export function kMath() {
     };
 
 
-    /*
+    /**
      * Random integer
      *
      * @param {Number} min
      * @param {Number} max
-     * @returns {Number}
+     * @return {Number}
      */
     this.randomInt = function(min, max) {
         return this.floor32(Math.random() * (max - min + 1) + min);
     };
 
 
-    /*
+    /**
      * Random permutation
      *
      * @param {Number} index
-     * @returns {Array}
+     * @return {Array}
      */
     this.randomPerm = function(index) {
 
@@ -971,34 +1001,34 @@ export function kMath() {
     };
 
 
-    /*
+    /**
      * Bit Divisor
      *
      * @param {Number} bits
-     * @returns {Number}
+     * @return {Number}
      */
     this.bitDivisor = bits => 1 << (bits - 1);
 
 
-    /*
+    /**
      * Bit Mask
      *
      * @param {Number} bits
-     * @returns {Number}
+     * @return {Number}
      */
     this.bitMask = bits => (1 << bits) - 1;
 
 
-    /*
+    /**
      * Bit Shift
      *
      * @param {Number} x
      * @param {Number} bits
-     * @returns {Number}
+     * @return {Number}
      */
     this.bitShift = (x, bits) => (self.bitMask(bits) & x) / self.bitDivisor(bits);
 
-    /*
+    /**
      * Permutation table
      *
      * @constant {Float32Array}
@@ -1018,7 +1048,7 @@ export function kMath() {
         138, 236, 205, 93, 222, 114, 67, 29, 24, 72, 243, 141, 128, 195, 78, 66, 215, 61, 156, 180
     ]);
 
-    /*
+    /**
      * Permutation table modulo 12
      *
      * @constant {Float32Array}
@@ -1040,7 +1070,7 @@ export function kMath() {
         0, 10, 7, 1, 7, 10, 1, 4, 0, 0, 8, 7, 1, 2, 9, 7, 4, 6, 2, 6, 8, 1, 9, 6, 6, 7, 5, 0, 0, 3, 9, 8, 3, 6, 6, 11, 1, 0, 0
     ]);
 
-    /*
+    /**
      * A lookup table to traverse the simplex around a given point in 4D.
      *
      * @constant {Float32Array}
@@ -1114,12 +1144,12 @@ export function kMath() {
 
 
 
-    /*
+    /**
      * Compute 1d Gradients
      *
      * @param {Number} hash
      * @param {Number} x
-     * @returns {Number}
+     * @return {Number}
      */
     this.gradient1d = (hash, x) => {
 
@@ -1138,13 +1168,13 @@ export function kMath() {
     };
 
 
-    /*
+    /**
      * Compute 2d Gradients
      *
      * @param {Number} hash
      * @param {Number} x
      * @param {Number} y
-     * @returns {Number}
+     * @return {Number}
      */
     this.gradient2d = (hash, x, y) => {
 
@@ -1158,14 +1188,14 @@ export function kMath() {
         return ((h & 1) ? -u : u) + ((h & 2) ? -2.0 * v : 2.0 * v);
     };
 
-    /*
+    /**
      * Compute 3d Gradients
      *
      * @param {Number} hash
      * @param {Number} x
      * @param {Number} y
      * @param {Number} z
-     * @returns {Number}
+     * @return {Number}
      */
     this.gradient3d = (hash, x, y, z) => {
 
@@ -1178,7 +1208,7 @@ export function kMath() {
         return ((h & 1) ? -u : u) + ((h & 2) ? -v : v);
     };
 
-    /*
+    /**
      * Compute 4d Gradients
      *
      * @param {Number} hash
@@ -1186,7 +1216,7 @@ export function kMath() {
      * @param {Number} y
      * @param {Number} z
      * @param {Number} t
-     * @returns {Number}
+     * @return {Number}
      */
     this.gradient4d = (hash, x, y, z, t) => {
 
@@ -1201,11 +1231,11 @@ export function kMath() {
         return ((h & 1) ? -u : u) + ((h & 2) ? -v : v) + ((h & 4) ? -w : w);
     };
 
-    /*
+    /**
      * 1d Signed Simplex Noise
      *
      * @param {Number} x
-     * @returns {Number}
+     * @return {Number}
      */
     this.signedNoise1d = x => {
 
@@ -1227,12 +1257,12 @@ export function kMath() {
         return 0.25 * (n0 + n1);
     };
 
-    /*
+    /**
      * 2d Signed ofSimplex Noise
      *
      * @param {Number} x
      * @param {Number} y
-     * @returns {Number}
+     * @return {Number}
      */
     this.signedNoise2d = (x, y) => {
 
@@ -1275,13 +1305,13 @@ export function kMath() {
         return 40.0 * (n0 + n1 + n2);
     };
 
-    /*
+    /**
      * 3d Signed ofSimplex Noise
      *
      * @param {Number} x
      * @param {Number} y
      * @param {Number} z
-     * @returns {Number}
+     * @return {Number}
      */
     this.signedNoise3d = (x, y, z) => {
         // Skew the input space to determine which simplexLookup cell we're in
@@ -1386,14 +1416,14 @@ export function kMath() {
         return 32.0 * (n0 + n1 + n2 + n3);
     };
 
-    /*
+    /**
      * 4d Signed ofSimplex Noise
      *
      * @param {Number} x
      * @param {Number} y
      * @param {Number} z
      * @param {Number} w
-     * @returns {Number}
+     * @return {Number}
      */
     this.signedNoise4d = (x, y, z, w) => {
         let n0;
@@ -1574,41 +1604,41 @@ export function kMath() {
         return 27.0 * (n0 + n1 + n2 + n3 + n4); /* TODO: The scale factor is preliminary! */
     };
 
-    /*
+    /**
      * 1d ofSimplex Noise
      *
      * @param {Number} x
-     * @returns {Number}
+     * @return {Number}
      */
     this.simplexNoise1d = x => self.signedNoise1d(x) * 0.5 + 0.5;
 
-    /*
+    /**
      * 2d ofSimplex Noise
      *
      * @param {Number} x
      * @param {Number} y
-     * @returns {Number}
+     * @return {Number}
      */
     this.simplexNoise2d = (x, y) => self.signedNoise2d(x, y) * 0.5 + 0.5;
 
-    /*
+    /**
      * 3d ofSimplex Noise
      *
      * @param {Number} x
      * @param {Number} y
      * @param {Number} z
-     * @returns {Number}
+     * @return {Number}
      */
     this.simplexNoise3d = (x, y, z) => self.signedNoise3d(x, y, z) * 0.5 + 0.5;
 
-    /*
+    /**
      * 4d ofSimplex Noise
      *
      * @param {Number} x
      * @param {Number} y
      * @param {Number} z
      * @param {Number} w
-     * @returns {Number}
+     * @return {Number}
      */
     this.simplexNoise4d = (x, y, z, w) => self.signedNoise4d(x, y, z, w) * 0.5 + 0.5;
 };
