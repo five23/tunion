@@ -21,6 +21,8 @@ import jsWorkerUrl from "file-loader!ace-builds/src-noconflict/worker-javascript
  */
 window.onload = function () {
   
+  var AudioContext = window.AudioContext || window.webkitAudioContext;
+
   self.audioContext = new AudioContext();
 
   self.defaultRack = `/**
