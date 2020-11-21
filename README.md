@@ -6,7 +6,7 @@ Ultra precision polygamma synth (the PAINT IS WET)
 
 Powered by NexusUI 
 
-![https://nexus-js.github.io/ui/](https://nexus-js.github.io/ui/)
+[https://nexus-js.github.io/ui/](https://nexus-js.github.io/ui/)
 
 Inspired by wavep0t
 
