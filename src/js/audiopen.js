@@ -20,6 +20,9 @@ import jsWorkerUrl from "file-loader!ace-builds/src-noconflict/worker-javascript
  * onload
  */
 window.onload = function () {
+  
+  self.audioContext = new AudioContext();
+
   self.defaultRack = `/**
  * uni0n!.
  */
@@ -352,12 +355,13 @@ AudioPen.prototype = {
   start: function () {
     var self = this;
 
+    this.audioContext = window.audioContext;
+    
     this.initAceEditor();
     this.compileCode();
 
     this.channelCount = 2;
-    this.audioContext = new (window.AudioContext ||
-      window.webkitAudioContext)();
+  
     this.gainNode = this.audioContext.createGain();
     this.scriptNode = this.audioContext.createScriptProcessor(
       this.bufferSize,
