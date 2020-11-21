@@ -27,7 +27,7 @@ export function kMath() {
     this.G4 = 0.13819660112501051517954131656344; // @constant {Number} 1/(5 + sqrt(5))
     this.H2 = 0.57735026918962576450914878050196; // @constant {Number} 1/(sqrt(3))
     this.TWOLN2 = 1.3862943611198906188344642429164; // @constant {Number} 2 ln(2)
-
+    this.OMEGA = 0.031344688607245102605976487270816; // @constant {Number} 440 * pi/44100
     
     /**
      * Get OEIS sequence by ID
@@ -203,6 +203,51 @@ export function kMath() {
         2.398239129535781
     ];
 
+    
+    /**
+     * Precision Square Wave Approximation
+     *
+     * @param {Number} x
+     * @param {Number} N Partials
+     * @return {Number}
+     */
+    this.sqr12 = (x, N) => {
+        x *= self.OMEGA;        
+        var c = Math.cos(x);
+        var b = 4 * N * c;
+        var c = self.digamma12(0.75 - b) - self.digamma12(0.25 - b);
+        const v = Math.cos(self.TAU * b) * (c / Math.PI) - 1;
+        return 0.5 * v;
+    };
+
+
+    /**
+     * Precision Sawtooth Wave Approximation
+     *
+     * @param {Number} x
+     * @param {Number} N Partials
+     * @return {Number} 
+     */
+    this.saw12 = (x, N) => {
+        const v = Math.sin(x * self.OMEGA) * self.sqr12(x, N);
+        return v;
+    }
+
+    /**
+     * Precision Triangle Wave Approximation
+     * Note: it's a misnomer perhaps to call this a 'triangle' as 
+     * the overall shape tends more towards a smooth waveform, yet it
+     * continues to maintain subtractive properties like a triangle.
+     *
+     * @param {Number} x
+     * @param {Number} N
+     * @return {Number} 
+     */
+    this.tri12 = (x, N) => {
+        const v = self.sqr12(x, N) * self.saw12(x, N);
+        return 1.5 * v;
+    }
+  
 
     /**
      * csc
@@ -400,48 +445,7 @@ export function kMath() {
      */
     this.mod = (x, y) => x - Math.floor(x / y) * y;
 
-
-    /**
-     * Precision Square Wave Approximation
-     *
-     * @param {Number} a
-     * @param {Number} b Partials
-     * @return {Number}
-     */
-    this.sqr12 = (a, b) => {
-        b *= self.TAU * b;
-        const v = Math.cos(self.TAU * b * Math.cos(a)) * ((self.digamma12(0.75 - b * Math.cos(a)) - self.digamma12(0.25 - b * Math.cos(a))) / Math.PI) - 1;
-        return 0.5 * v;
-    };
-
-
-    /**
-     * Precision Sawtooth Wave Approximation
-     *
-     * @param {Number} a
-     * @param {Number} b Partials
-     * @return {Number} 
-     */
-    this.saw12 = (a, b) => {
-        const v = Math.sin(a) * self.sqr12(a, b);
-        return 1.5 * v;
-    }
-
-    /**
-     * Precision Triangle Wave Approximation
-     * Note: it's a misnomer perhaps to call this a 'triangle' in the traditional sense,
-     * as the overall shape tends more towards a smooth waveform (and yet continues to 
-     * maintain subtractive properties like a sawtooth). Your mileage may vary.
-     *
-     * @param {Number} a
-     * @param {Number} b
-     * @return {Number} 
-     */
-    this.tri12 = (a, b) => {
-        const v = self.sqr12(a, b) * self.saw12(a, b);
-        return 3.0 * v;
-    }
-  
+    
     /**
      * Factorial
      *
@@ -587,9 +591,9 @@ export function kMath() {
      */
    this.digamma12 = (x, PRECISION) => {
 
-    // Defaults to 32, est. max ~32678*12
+    // Defaults to 64, est. max ~32678*12
     if (!PRECISION) {
-        PRECISION = 32;
+        PRECISION = 64;
     }
     var v = 0;
     

@@ -24,7 +24,6 @@
     "color-ops": "^2.0.0",
     "copy-webpack-plugin": "^6.3.2",
     "css-loader": "^5.0.1",
-    "delay": "git+https://github.com/opendsp/delay.git",
     "documentation": "^13.1.0",
     "es6ify": "^1.6.0",
     "file-loader": "^6.2.0",
