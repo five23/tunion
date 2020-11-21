@@ -593,18 +593,13 @@ export function kMath() {
 
     // Defaults to 64, est. max ~32678*12
     if (!PRECISION) {
-        PRECISION = 64;
+        PRECISION = 12;
     }
+
     var v = 0;
-    
-    /* If the absolute value of x is less than epsilon we assume zero */
-    /* TODO: this should return Complex Infinity */   
-    if (Math.abs(x) < Number.EPSILON) {      
-      return Infinity;
-    }
-    /* For negative integers we return Infinity */
+        
     /* TODO: this should return Complex Infinity */
-    if (Number.isInteger(x) && x < 0) {
+    if ((Math.abs(x) < Number.EPSILON) || (Number.isInteger(x) && x < 0)) {
       return Infinity;
     }
     /* Special values at positive integers (table lookup) */
@@ -653,7 +648,8 @@ export function kMath() {
             x) /
           x) /
         x);
-    }
+    };
+        
 
     /**
      * Harmonic Number
