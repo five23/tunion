@@ -1,29 +1,16 @@
-/*----------------------------------//
-      _ __/`\/
-    /'( _ (^'
-    /'| `>\ uni0nsongbook
-/*----------------------------------*/
-
 body {
-  padding: 20px;
+  padding: 8px;
   margin: 0;
-  background-color: #fef2f4;
+  background-color: #fefefe;
   color: #333;
-}
-
-#rack {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  display: flex;
-  align-items: flex-start;
-  flex-direction: column;
+  font: 12px / normal "Monaco", "Menlo", "Ubuntu Mono", "Consolas",
+    "source-code-pro", monospace;
+  visibility: hidden;
 }
 
 #editor {
-  font: 16px / normal "Monaco", "Menlo", "Ubuntu Mono", "Consolas",
-    "source-code-pro", monospace;
-  width: 70%;
+  font-size: 15px;
+  width: 60%;
   height: 100%;
   right: 0;
   top: 0;
@@ -38,133 +25,85 @@ body {
   visibility: visible;
 }
 
-#waveform {
-  padding: 0 0 0 0;
-  margin: 0 0 2px 2px;
-  border: 2px solid #a32da3;
-  opacity: 1;
-}
+.navbar {
+  display: flex;
+  align-items: center;
+  margin: 8px;
 
-#view1 {
-  margin: 10px 0;
-}
+  .item {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 192px;
 
-.visuals {
-  color: #e6e1dc;
-  font: 14px / normal "Monaco", "Menlo", "Ubuntu Mono", "Consolas",
-    "source-code-pro", monospace;
-  padding: 4px 0 8px;
-}
-
-.radioset {
-  font-family: monaco, Consolas, "Lucida Console", monospace;
-  font-size: 14px;
-  font-style: normal;
-  font-variant: normal;
-  font-weight: 500;
-  line-height: 26.4px;
-}
-
-h1 {
-  font-family: monaco, Consolas, "Lucida Console", monospace;
-  font-size: 24px;
-  font-style: normal;
-  font-variant: normal;
-  font-weight: 500;
-  line-height: 26.4px;
-}
-
-h3 {
-  font-family: monaco, Consolas, "Lucida Console", monospace;
-  font-size: 14px;
-  font-style: normal;
-  font-variant: normal;
-  font-weight: 500;
-  line-height: 15.4px;
-}
-
-p {
-  font-family: monaco, Consolas, "Lucida Console", monospace;
-  font-size: 14px;
-  font-style: normal;
-  font-variant: normal;
-  font-weight: 400;
-  line-height: 20px;
-}
-
-blockquote {
-  font-family: monaco, Consolas, "Lucida Console", monospace;
-  font-size: 21px;
-  font-style: normal;
-  font-variant: normal;
-  font-weight: 400;
-  line-height: 30px;
-}
-
-pre {
-  font-family: monaco, Consolas, "Lucida Console", monospace;
-  font-size: 13px;
-  font-style: normal;
-  font-variant: normal;
-  font-weight: 400;
-  line-height: 18.5714px;
-}
-
-@-webkit-keyframes cd-close-1 {
-  0%,
-  50% {
-    -webkit-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-  100% {
-    -webkit-transform: rotate(45deg);
-    transform: rotate(45deg);
+    label {
+      margin: 4px;
+    }
   }
 }
-@keyframes cd-close-1 {
-  0%,
-  50% {
-    -webkit-transform: rotate(0deg);
-    transform: rotate(0deg);
+
+.rack {
+  display: flex;
+}
+
+.views {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  margin: 4px;
+
+  .fieldset {
+    margin: 4px;
   }
-  100% {
-    -webkit-transform: rotate(45deg);
-    transform: rotate(45deg);
+
+  .header {
+    background-color: #eeeeee;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    height: 32px;
+  }
+
+  .item {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 192px;
+
+    label {
+      margin: 4px;
+    }
   }
 }
-@-webkit-keyframes cd-close-2 {
-  0%,
-  50% {
-    -webkit-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-  100% {
-    -webkit-transform: rotate(-45deg);
-    transform: rotate(-45deg);
-  }
-}
-@keyframes cd-close-2 {
-  0%,
-  50% {
-    -webkit-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-  100% {
-    -webkit-transform: rotate(-45deg);
-    transform: rotate(-45deg);
+
+.controls {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin: 4px;
+
+  .fieldset {
+    margin: 4px;
+
+    .item {
+      margin-bottom: 8px;
+    }
   }
 }
+
 .editor__container {
   right: 0;
   -webkit-transform: translate3d(100%, 0, 0);
   transform: translate3d(100%, 0, 0);
 }
+
 .visible .editor__container {
   -webkit-transform: translate3d(0, 0, 0);
   transform: translate3d(0, 0, 0);
   -webkit-transition-delay: 0s;
   transition-delay: 0s;
 }
+
 @media only screen and (min-width: 768px) {
   .editor__container {
     width: 70%;
@@ -175,6 +114,7 @@ pre {
     width: 50%;
   }
 }
+
 .editor__content {
   position: absolute;
   top: 0;
@@ -185,15 +125,18 @@ pre {
   overflow: auto;
   -webkit-overflow-scrolling: touch;
 }
+
 .editor__content p {
   font-size: 1.4rem;
   color: #424f5c;
   line-height: 1.4;
   margin: 2em 0;
 }
+
 .editor__content p:first-of-type {
   margin-top: 0;
 }
+
 @media only screen and (min-width: 768px) {
   .editor__content p {
     font-size: 1.6rem;

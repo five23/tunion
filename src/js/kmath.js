@@ -587,9 +587,9 @@ export function kMath() {
      */
    this.digamma12 = (x, PRECISION) => {
 
-    // Defaults to 12, est. max ~32678*12
+    // Defaults to 32, est. max ~32678*12
     if (!PRECISION) {
-        PRECISION = 12;
+        PRECISION = 32;
     }
     var v = 0;
     

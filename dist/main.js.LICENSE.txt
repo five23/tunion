@@ -1,0 +1,8 @@
+/**
+ * @module delay
+ * @author stagas
+ * @org opendsp
+ * @desc delay
+ * @see http://www.musicdsp.org/showone.php?id=98
+ * @license mit
+ */

@@ -5,7 +5,7 @@
       {
         "absoluteRuntime": false,
         "corejs": false,
-        "helpers": false,
+        "helpers": true,
         "regenerator": true,
         "useESModules": false,
         "version": "7.0.0-beta.0"

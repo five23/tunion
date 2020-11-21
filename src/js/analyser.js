@@ -58,26 +58,31 @@ export function create3DDebugContext(context) {
  *
  * @param {*} canvasElementID
  */
-export function AnalyserView(properties) {  
+export function AnalyserView(properties) {
   this.canvasElementID = properties.canvasElementID;
   this.analysisType = ANALYSISTYPE_FREQUENCY;
   this.sonogram3DWidth = 256;
   this.sonogram3DHeight = 256;
-  this.sonogram3DGeometrySize = 10;
+  this.sonogram3DGeometrySize = 12;
   this.freqByteData = 0;
   this.texture = 0;
   this.TEXTURE_HEIGHT = 256;
-  this.yoffset = 0;
-  this.frequencyShader = 0;
-  this.waveformShader = 0;
-  this.sonogramShader = 0;
-  this.sonogram3DShader = 0;
 
   // Background color
-  this.backgroundColor = [191.0 / 255.0, 169.0 / 255.0, 135.0 / 255.0, 1.0];
+  this.backgroundColor = properties.backgroundColor || [
+    238 / 255,
+    238 / 255,
+    238 / 255,
+    1,
+  ];
 
   // Foreground color
-  this.foregroundColor = [63.0 / 255.0, 39.0 / 255.0, 0.0 / 255.0, 1.0];
+  this.foregroundColor = properties.foregroundColor || [
+    34 / 255,
+    187 / 255,
+    187 / 255,
+    1,
+  ];
 
   this.initGL();
 }
