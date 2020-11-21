@@ -57,6 +57,7 @@ module.exports = [
       }),
       new CopyWebpackPlugin({
         patterns: [{ from: "shaders/*", to: "." }],
+        patterns: [{ from: "src/favicon.ico", to: "."}]
       }),
     ],
   },
