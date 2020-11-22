@@ -113,39 +113,6 @@ shader.loadFromScriptNodes = (gl, vertexScriptName, fragmentScriptName) => {
   return new shader.Shader(gl, vertexScript.text, fragmentScript.text);
 };
 
-shader.loadTextFileSynchronous = (url) => {
-  /** @type {*} */
-  const error = `loadTextFileSynchronous failed to load url "${url}"`;
-  let request;
-
-  request = new XMLHttpRequest();
-  if (request.overrideMimeType) {
-    request.overrideMimeType("text/plain");
-  }
-
-  request.open("GET", url, false);
-  request.send(null);
-  if (request.readyState != 4) {
-    throw error;
-  }
-  return request.responseText;
-};
-
-/**
- *
- *
- * @param {*} gl
- * @param {*} vertexURL
- * @param {*} fragmentURL
- * @return {*}
- */
-shader.loadFromURL = (gl, vertexURL, fragmentURL) => {
-  const vertexText = shader.loadTextFileSynchronous(vertexURL);
-  const fragmentText = shader.loadTextFileSynchronous(fragmentURL);
-
-  if (!vertexText || !fragmentText) return null;
-  return new shader.Shader(gl, vertexText, fragmentText);
-};
 
 /**
  *
@@ -158,6 +125,7 @@ shader.glslNameToJs_ = (name) => {
     return p1.toUpperCase();
   });
 };
+
 
 /**
  *

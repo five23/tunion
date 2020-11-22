@@ -55,8 +55,7 @@ module.exports = [
         filename: "./index.html",
         minify: false,
       }),
-      new CopyWebpackPlugin({
-        patterns: [{ from: "shaders/*", to: "." }],
+      new CopyWebpackPlugin({        
         patterns: [{ from: "src/favicon.ico", to: "."}]
       }),
     ],

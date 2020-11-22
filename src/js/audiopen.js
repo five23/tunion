@@ -5,8 +5,6 @@
 /*----------------------------------*/
 
 import { kMath } from "./kmath";
-import { Matrix4x4 } from "./matrix4x4";
-import { CameraController, shader } from "./utils3d";
 import { AnalyserView } from "./analyser";
 
 import "ace-builds/src-noconflict/ace";
@@ -20,7 +18,6 @@ import jsWorkerUrl from "file-loader!ace-builds/src-noconflict/worker-javascript
  * onload
  */
 window.onload = function () {
-  
   var AudioContext = window.AudioContext || window.webkitAudioContext;
 
   self.audioContext = new AudioContext();
@@ -386,6 +383,8 @@ AudioPen.prototype = {
     this.amplitudeData = new Uint8Array(self.analyser.frequencyBinCount);
 
     document.body.style.visibility = "visible";
+
+    this.audioContext.resume();
 
     this.mainLoop();
   },

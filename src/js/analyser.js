@@ -1,6 +1,8 @@
 import { Matrix4x4 } from "./matrix4x4";
 import { CameraController, shader } from "./utils3d";
 
+window.shader = shader;
+
 // The "model" matrix is the "world" matrix in Standard Annotations and Semantics
 var model = new Matrix4x4();
 var view = new Matrix4x4();
@@ -10,6 +12,120 @@ var ANALYSISTYPE_FREQUENCY = 0;
 var ANALYSISTYPE_SONOGRAM = 1;
 var ANALYSISTYPE_3D_SONOGRAM = 2;
 var ANALYSISTYPE_WAVEFORM = 3;
+
+
+var common_vertex_shader = `
+attribute vec3 gPosition;
+attribute vec2 gTexCoord0;
+
+varying vec2 texCoord;
+
+void main()
+{
+  gl_Position = vec4(gPosition.x, gPosition.y, gPosition.z, 1.0);
+  texCoord = gTexCoord0;
+}`;
+
+
+var frequency_fragment_shader = `
+#ifdef GL_ES
+precision mediump float;
+#endif
+
+varying vec2 texCoord;
+uniform sampler2D frequencyData;
+uniform vec4 foregroundColor;
+uniform vec4 backgroundColor;
+uniform float yoffset;
+
+void main()
+{
+    vec4 sample = texture2D(frequencyData, vec2(texCoord.x, yoffset));
+    if (texCoord.y > sample.a) {
+        // if (texCoord.y > sample.a + 1 || texCoord.y < sample.a - 1) {
+        discard;
+    }
+    float x = texCoord.y / sample.a;
+    x = x * x * x;
+    gl_FragColor = mix(foregroundColor, backgroundColor, x);
+}
+`;
+
+
+var sonogram_fragment_shader = `
+#ifdef GL_ES
+precision mediump float;
+#endif
+
+varying vec2 texCoord;
+
+uniform sampler2D frequencyData;
+uniform vec4 foregroundColor;
+uniform vec4 backgroundColor;
+uniform float yoffset;
+
+void main()
+{
+    float x = pow(256.0, texCoord.x - 1.0);
+    float y = texCoord.y + yoffset;
+
+    vec4 sample = texture2D(frequencyData, vec2(x, y));
+    float k = sample.a;
+
+    // gl_FragColor = vec4(k, k, k, 1.0);
+    // Fade out the mesh close to the edges
+    float fade = pow(cos((1.0 - texCoord.y) * 0.5 * 3.1415926535), 0.5);
+    k *= fade;
+    vec4 color = k * vec4(0,0,0,1) + (1.0 - k) * backgroundColor;
+    gl_FragColor = color;
+}
+`;
+
+
+var sonogram_vertex_shader = `
+attribute vec3 gPosition;
+attribute vec2 gTexCoord0;
+uniform sampler2D vertexFrequencyData;
+uniform float vertexYOffset;
+uniform mat4 worldViewProjection;
+uniform float verticalScale;
+
+varying vec2 texCoord;
+
+void main()
+{
+    float x = pow(256.0, gTexCoord0.x - 1.0);
+    vec4 sample = texture2D(vertexFrequencyData, vec2(x, gTexCoord0.y + vertexYOffset));
+    vec4 newPosition = vec4(gPosition.x, gPosition.y + verticalScale * sample.a, gPosition.z, 1.0);
+    gl_Position = worldViewProjection * newPosition;
+    texCoord = gTexCoord0;
+}
+`;
+
+
+var waveform_fragment_shader = `
+#ifdef GL_ES
+precision mediump float;
+#endif
+
+varying vec2 texCoord;
+uniform sampler2D frequencyData;
+uniform vec4 foregroundColor;
+uniform vec4 backgroundColor;
+uniform float yoffset;
+
+void main()
+{
+    vec4 sample = texture2D(frequencyData, vec2(texCoord.x, yoffset));
+    if (texCoord.y > sample.a + 0.005 || texCoord.y < sample.a - 0.005) {
+        discard;
+    }
+    float x = (texCoord.y - sample.a) / 0.005;
+    x = x * x * x;
+    gl_FragColor = mix(foregroundColor, backgroundColor, x);
+}
+`;
+
 
 /**
  *
@@ -243,29 +359,29 @@ AnalyserView.prototype.initGL = function () {
   gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
   // Note we do not unbind this buffer -- not necessary
 
-  // Load the shaders
-  this.frequencyShader = shader.loadFromURL(
+  this.frequencyShader = new shader.Shader(
     gl,
-    "shaders/common-vertex.shader",
-    "shaders/frequency-fragment.shader"
+    common_vertex_shader,
+    frequency_fragment_shader
   );
-  this.waveformShader = shader.loadFromURL(
+  this.waveformShader = new shader.Shader(
     gl,
-    "shaders/common-vertex.shader",
-    "shaders/waveform-fragment.shader"
+    common_vertex_shader,
+    waveform_fragment_shader
   );
-  this.sonogramShader = shader.loadFromURL(
+  this.sonogramShader = new shader.Shader(
     gl,
-    "shaders/common-vertex.shader",
-    "shaders/sonogram-fragment.shader"
+    common_vertex_shader,
+    sonogram_fragment_shader
   );
 
-  if (this.has3DVisualizer)
-    this.sonogram3DShader = shader.loadFromURL(
+  if (this.has3DVisualizer) {
+    this.sonogram3DShader = new shader.Shader(
       gl,
-      "shaders/sonogram-vertex.shader",
-      "shaders/sonogram-fragment.shader"
+      sonogram_vertex_shader,
+      sonogram_fragment_shader
     );
+  }
 };
 
 AnalyserView.prototype.initByteBuffer = function (analyser) {
