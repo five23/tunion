@@ -6,6 +6,7 @@
 
 import { kMath } from "./kmath";
 import { AnalyserView } from "./analyser";
+import { Delay } from "./delay";
 
 import "ace-builds/src-noconflict/ace";
 import "ace-builds/src-noconflict/mode-javascript";
@@ -14,29 +15,11 @@ import NexusUI from "nexusui";
 
 import jsWorkerUrl from "file-loader!ace-builds/src-noconflict/worker-javascript";
 
-/**
- * onload
- */
-window.onload = function () {
-  var AudioContext = window.AudioContext || window.webkitAudioContext;
-
-  self.audioContext = new AudioContext();
-
-  self.defaultRack = `/**
- * uni0n!.
- */
-function process(buffer) {
-    
-  for (var t = 0; t < buffer.length; ++t) {
-    
-    vco1.theta *= 1.00000001;
-    vco2.theta *= 0.99999998;
-    vco3.theta *= 1.00000001;
-    vco4.theta *= 0.99999998;
-    
-    d0 = K.lpf(aux0dial.value, d0);               // Delay amplitude
-    d1 = K.lpf(aux1dial.value * 0.99 + 0.01, d1); // Delay feedback        
-    d2 = K.lpf(aux2dial.value * 16000 + 162, d2); // Delay time
+const defaultRack = `function process(buffer) {  
+  for (var t = 0; t < buffer.length; ++t) {    
+    delay.d0 = K.lpf(aux0dial.value, delay.d0);               // Delay amplitude
+    delay.d1 = K.lpf(aux1dial.value * 0.99 + 0.01, delay.d1); // Delay feedback        
+    delay.d2 = K.lpf(aux2dial.value * 16000 + 162, delay.d2); // Delay time
     
     vco1.step = K.lpf(vco1pos._x.value, vco1.step);
     vco1.N = K.lpf(vco1pos._y.value, vco1.N);
@@ -61,21 +44,57 @@ function process(buffer) {
     
     out = 0.25 * (vco1.out + vco2.out + vco3.out + vco4.out);
     
-    dO = d0 * delay.feedback(d1).delay(d2).run(out);
+    delay.dO = delay.d0 * delay.feedback(delay.d1).delay(delay.d2).run(out);
     
-    buffer[t] = 0.5 * (out + dO);
+    buffer[t] = 0.5 * (out + delay.dO);
+
+    // drift
+    vco1.theta *= 1.00000001;
+    vco2.theta *= 0.99999998;
+    vco3.theta *= 1.00000001;
+    vco4.theta *= 0.99999998;
   }
 }`;
 
-  self.out = 0;
-  self.d0 = 0;
-  self.d1 = 0;
-  self.d2 = 0;
-  self.dO = 0;
+/**
+ * onload
+ */
+window.onload = function () {
+  var views = document.getElementById("views");
+
+  var AudioContext = window.AudioContext || window.webkitAudioContext;
+
+  self.audioContext = new AudioContext();
 
   self.nx = NexusUI;
   self.K = new kMath();
-  self.audiopen = new AudioPen();
+  self.out = 0;
+
+  self.playToggle = new nx.TextButton("toggle-play", {
+    text: "▶",
+    alternateText: "⏹",
+    size: [32, 32],
+  });
+
+  if (self.audioContext.state === "running") {
+    views.style.opacity = "1.0";
+    self.playToggle.state = true;
+  }
+
+  self.editorToggle = new nx.Toggle("#toggle-editor", {
+    size: [40, 20],
+    state: false,
+  });
+
+  self.editorToggle.on("change", function (v) {
+    if (v) {
+      document.getElementById("editor").className =
+        "ace_editor ace_hidpi ace-tm visible";
+    } else {
+      document.getElementById("editor").className =
+        "ace_editor ace_hidpi ace-tm";
+    }
+  });
 
   self.vco1 = {
     step: 0,
@@ -105,21 +124,6 @@ function process(buffer) {
     out: 0,
   };
 
-  self.editorToggle = new nx.Toggle("#toggle-editor", {
-    size: [40, 20],
-    state: false,
-  });
-
-  self.editorToggle.on("change", function (v) {
-    if (v) {
-      document.getElementById("editor").className =
-        "ace_editor ace_hidpi ace-tm visible";
-    } else {
-      document.getElementById("editor").className =
-        "ace_editor ace_hidpi ace-tm";
-    }
-  });
-
   self.view1sel = new nx.Select("#view1sel", {
     size: [128, 32],
     options: ["frequency", "sonogram", "3d sonogram", "waveform"],
@@ -148,7 +152,7 @@ function process(buffer) {
     max: 1,
     step: 0,
     candycane: 3,
-    values: [0,0,0,0],
+    values: [0, 0, 0, 0],
     smoothing: 0,
     mode: "bar", // 'bar' or 'line'
   });
@@ -172,7 +176,7 @@ function process(buffer) {
     max: 1,
     step: 0,
     candycane: 3,
-    values: [0,0,0,0],
+    values: [0, 0, 0, 0],
     smoothing: 0,
     mode: "bar", // 'bar' or 'line'
   });
@@ -196,7 +200,7 @@ function process(buffer) {
     max: 1,
     step: 0,
     candycane: 3,
-    values: [0,0,0,0],
+    values: [0, 0, 0, 0],
     smoothing: 0,
     mode: "bar", // 'bar' or 'line'
   });
@@ -220,7 +224,7 @@ function process(buffer) {
     max: 1,
     step: 0,
     candycane: 3,
-    values: [0,0,0,0],
+    values: [0, 0, 0, 0],
     smoothing: 0,
     mode: "bar", // 'bar' or 'line'
   });
@@ -263,67 +267,25 @@ function process(buffer) {
     value: 0,
   });
 
-  // Delay (via opendsp)
-  function Delay(size) {
-    if (!(this instanceof Delay)) return new Delay(size);
-    size = size || 16384;
-    this.buffer = new Float32Array(size);
-    this.size = size;
-    this.counter = 0;
-    this._feedback = 0.5;
-    this._delay = 16384;
-  }
-
-  Delay.prototype.feedback = function (n) {
-    this._feedback = n;
-    return this;
-  };
-
-  Delay.prototype.delay = function (n) {
-    this._delay = n;
-    return this;
-  };
-
-  Delay.prototype.run = function (inp) {
-    var back = this.counter - this._delay;
-    if (back < 0) back = this.size + back;
-    var index0 = Math.floor(back);
-
-    var index_1 = index0 - 1;
-    var index1 = index0 + 1;
-    var index2 = index0 + 2;
-
-    if (index_1 < 0) index_1 = this.size - 1;
-    if (index1 >= this.size) index1 = 0;
-    if (index2 >= this.size) index2 = 0;
-
-    var y_1 = this.buffer[index_1];
-    var y0 = this.buffer[index0];
-    var y1 = this.buffer[index1];
-    var y2 = this.buffer[index2];
-
-    var x = back - index0;
-
-    var c0 = y0;
-    var c1 = 0.5 * (y1 - y_1);
-    var c2 = y_1 - 2.5 * y0 + 2.0 * y1 - 0.5 * y2;
-    var c3 = 0.5 * (y2 - y_1) + 1.5 * (y0 - y1);
-
-    var out = ((c3 * x + c2) * x + c1) * x + c0;
-
-    this.buffer[this.counter] = inp + out * this._feedback;
-
-    this.counter++;
-
-    if (this.counter >= this.size) this.counter = 0;
-
-    return out;
-  };
-
   self.delayOut = 0;
   self.delay = Delay(16384);
 
-  audiopen.start();
+  self.audiopen = new AudioPen();
+  self.audiopen.start();
+
+  self.playToggle.on("change", (v) => {
+    if (v) {
+      if (self.audioContext.state === "suspended") {
+        self.audioContext.resume();
+      }
+      views.style.opacity = "1.0";
+    } else {
+      if (self.audioContext.state === "running") {
+        self.audioContext.suspend();
+      }
+      views.style.opacity = "0.0";
+    }
+  });
 };
 
 /**
@@ -355,12 +317,12 @@ AudioPen.prototype = {
     var self = this;
 
     this.audioContext = window.audioContext;
-    
+
     this.initAceEditor();
     this.compileCode();
 
     this.channelCount = 2;
-  
+
     this.gainNode = this.audioContext.createGain();
     this.scriptNode = this.audioContext.createScriptProcessor(
       this.bufferSize,
@@ -383,8 +345,6 @@ AudioPen.prototype = {
     this.amplitudeData = new Uint8Array(self.analyser.frequencyBinCount);
 
     document.body.style.visibility = "visible";
-
-    this.audioContext.resume();
 
     this.mainLoop();
   },

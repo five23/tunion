@@ -47,11 +47,12 @@ body {
   justify-content: space-between;
 }
 
-.views {
+#views {
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
-
+  opacity: 0;
+  
   .fieldset {
     margin: 8px;
   }
