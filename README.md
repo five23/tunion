@@ -2,7 +2,7 @@
 
 Work in progress
 
-![screenshot](https://five23.github.io/uni0n/screencap.png)
+![screenshot](https://raw.githubusercontent.com/five23/uni0n/master/screencap.png)
 
 Powered by NexusUI, WebAudio, WebGL, and [kmath.js](https://github.com/five23/kmath.js)
 
