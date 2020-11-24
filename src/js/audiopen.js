@@ -145,7 +145,7 @@ window.onload = function () {
     stepY: 0.00001,
   });
 
-  self.vco1sld = new nx.Multislider("#vco1sld", {
+/*  self.vco1sld = new nx.Multislider("#vco1sld", {
     size: [192, 192],
     numberOfSliders: 4,
     min: 0,
@@ -155,7 +155,7 @@ window.onload = function () {
     values: [0, 0, 0, 0],
     smoothing: 0,
     mode: "bar", // 'bar' or 'line'
-  });
+  });*/
 
   self.vco2pos = new nx.Position("#vco2pos", {
     size: [192, 192],
@@ -169,7 +169,7 @@ window.onload = function () {
     stepY: 0.00001,
   });
 
-  self.vco2sld = new nx.Multislider("#vco2sld", {
+  /*self.vco2sld = new nx.Multislider("#vco2sld", {
     size: [192, 192],
     numberOfSliders: 4,
     min: 0,
@@ -179,7 +179,7 @@ window.onload = function () {
     values: [0, 0, 0, 0],
     smoothing: 0,
     mode: "bar", // 'bar' or 'line'
-  });
+  });*/
 
   self.vco3pos = new nx.Position("#vco3pos", {
     size: [192, 192],
@@ -193,7 +193,7 @@ window.onload = function () {
     stepY: 0.00001,
   });
 
-  self.vco3sld = new nx.Multislider("#vco3sld", {
+  /*self.vco3sld = new nx.Multislider("#vco3sld", {
     size: [192, 192],
     numberOfSliders: 4,
     min: 0,
@@ -203,7 +203,7 @@ window.onload = function () {
     values: [0, 0, 0, 0],
     smoothing: 0,
     mode: "bar", // 'bar' or 'line'
-  });
+  });*/
 
   self.vco4pos = new nx.Position("#vco4pos", {
     size: [192, 192],
@@ -217,7 +217,7 @@ window.onload = function () {
     stepY: 0.00001,
   });
 
-  self.vco4sld = new nx.Multislider("#vco4sld", {
+  /*self.vco4sld = new nx.Multislider("#vco4sld", {
     size: [192, 192],
     numberOfSliders: 4,
     min: 0,
@@ -227,7 +227,7 @@ window.onload = function () {
     values: [0, 0, 0, 0],
     smoothing: 0,
     mode: "bar", // 'bar' or 'line'
-  });
+  });*/
 
   self.view1 = new nx.Oscilloscope("#view1", {
     size: [384, 222],

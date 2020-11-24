@@ -1,20 +1,19 @@
 {
   "name": "uni0n",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "uni0n",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "webpack --watch",
-    "build": "webpack"
+    "build": "webpack",
+    "serve": "webpack serve"
   },
   "author": "David Kirby (davidkirby@homophoni.com)",
   "license": "ISC",
   "devDependencies": {
-    "@babel/core": "^7.12.7",
+    "@babel/core": "^7.12.8",
     "@babel/highlight": "^7.10.4",
-    "@babel/plugin-transform-block-scoping": "^7.12.1",
-    "@babel/plugin-transform-object-assign": "^7.12.1",
     "@babel/plugin-transform-runtime": "^7.12.1",
     "@babel/plugin-transform-strict-mode": "^7.12.1",
     "@babel/polyfill": "^7.12.1",
@@ -33,7 +32,8 @@
     "sass-loader": "^10.1.0",
     "style-loader": "^2.0.0",
     "webpack": "^5.6.0",
-    "webpack-cli": "^4.2.0"
+    "webpack-cli": "^4.2.0",
+    "webpack-dev-server": "^3.11.0"
   },
   "dependencies": {
     "@babel/runtime": "^7.12.5",

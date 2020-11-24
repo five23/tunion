@@ -10,21 +10,6 @@ module.exports = [
           exclude: /(node_modules)/,
           use: {
             loader: "babel-loader",
-            options: {
-              presets: [
-                [
-                  "@babel/preset-env",
-                  {
-                    useBuiltIns: "entry",
-                  },
-                ],
-              ],
-              plugins: [
-                "@babel/plugin-transform-runtime",
-                "@babel/plugin-transform-strict-mode",
-                "@babel/plugin-transform-modules-commonjs",
-              ],
-            },
           },
         },
         {
@@ -32,9 +17,6 @@ module.exports = [
           use: [
             {
               loader: "html-loader",
-              options: {
-                minimize: false,
-              },
             },
           ],
         },
@@ -43,10 +25,6 @@ module.exports = [
           use: [
             {
               loader: "url-loader",
-              options: {
-                fallback: "file-loader",
-                name: "[name].[ext]",
-              },
             },
           ],
         },
