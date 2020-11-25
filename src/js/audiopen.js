@@ -81,6 +81,19 @@ window.onload = function () {
     self.playToggle.state = true;
   }
 
+  self.topRackToggle = new nx.Toggle("toggle-toprack", {
+    size: [40, 20],
+    state: false,
+  });
+
+  self.topRackToggle.on("change", function (v) {
+    if (v) {
+      document.getElementById("toprack").className = "visible";
+    } else {
+      document.getElementById("toprack").className = "";
+    }
+  });
+
   self.editorToggle = new nx.Toggle("#toggle-editor", {
     size: [40, 20],
     state: false,
@@ -145,7 +158,7 @@ window.onload = function () {
     stepY: 0.00001,
   });
 
-/*  self.vco1sld = new nx.Multislider("#vco1sld", {
+  /*  self.vco1sld = new nx.Multislider("#vco1sld", {
     size: [192, 192],
     numberOfSliders: 4,
     min: 0,

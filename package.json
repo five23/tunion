@@ -12,11 +12,8 @@
   "author": "David Kirby (davidkirby@homophoni.com)",
   "license": "ISC",
   "devDependencies": {
-    "@babel/core": "^7.12.8",
-    "@babel/highlight": "^7.10.4",
+    "@babel/core": "^7.12.9",
     "@babel/plugin-transform-runtime": "^7.12.1",
-    "@babel/plugin-transform-strict-mode": "^7.12.1",
-    "@babel/polyfill": "^7.12.1",
     "@babel/preset-env": "^7.12.7",
     "ace-builds": "^1.4.12",
     "babel-loader": "^8.2.1",
