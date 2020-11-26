@@ -1,6 +1,6 @@
 class H {
   constructor(precision, method) {
-    this.PRECISION = precision || 32;
+    this.PRECISION = precision || 12;
 
     this.TAU = 6.28318530717958647692528676655901; // @constant {Number} 2 pi
     this.GAMMA = 0.5772156649015328606065120900824; // @constant {Number} lim_(n->infty)(H_n-lnn)
