@@ -4,7 +4,8 @@
     /'| `>\ uni0n
 /*----------------------------------*/
 
-import { kMath } from "./kmath";
+//import { kMath } from "./kmath";
+import { H } from "./harmonic"
 import { AnalyserView } from "./analyser";
 import { Delay } from "./delay";
 
@@ -17,30 +18,30 @@ import jsWorkerUrl from "file-loader!ace-builds/src-noconflict/worker-javascript
 
 const defaultRack = `function process(buffer) {  
   for (var t = 0; t < buffer.length; ++t) {    
-    delay.d0 = K.lpf(aux0dial.value, delay.d0);               // Delay amplitude
-    delay.d1 = K.lpf(aux1dial.value * 0.99 + 0.01, delay.d1); // Delay feedback        
-    delay.d2 = K.lpf(aux2dial.value * 16000 + 162, delay.d2); // Delay time
+    delay.d0 = H.lpf(aux0dial.value, delay.d0);               // Delay amplitude
+    delay.d1 = H.lpf(aux1dial.value * 0.99 + 0.01, delay.d1); // Delay feedback        
+    delay.d2 = H.lpf(aux2dial.value * 16000 + 162, delay.d2); // Delay time
     
-    vco1.step = K.lpf(vco1pos._x.value, vco1.step);
-    vco1.N = K.lpf(vco1pos._y.value, vco1.N);
+    vco1.step = H.lpf(vco1pos._x.value, vco1.step);
+    vco1.N = H.lpf(vco1pos._y.value, vco1.N);
     vco1.theta += vco1.step;
 
-    vco2.step = K.lpf(vco2pos._x.value, vco2.step);
-    vco2.N = K.lpf(vco2pos._y.value, vco2.N);
+    vco2.step = H.lpf(vco2pos._x.value, vco2.step);
+    vco2.N = H.lpf(vco2pos._y.value, vco2.N);
     vco2.theta += vco2.step;
 
-    vco3.step = K.lpf(vco3pos._x.value, vco3.step);
-    vco3.N = K.lpf(vco3pos._y.value, vco3.N);
+    vco3.step = H.lpf(vco3pos._x.value, vco3.step);
+    vco3.N = H.lpf(vco3pos._y.value, vco3.N);
     vco3.theta += vco3.step;
 
-    vco4.step = K.lpf(vco4pos._x.value, vco4.step);
-    vco4.N = K.lpf(vco4pos._y.value, vco4.N);
+    vco4.step = H.lpf(vco4pos._x.value, vco4.step);
+    vco4.N = H.lpf(vco4pos._y.value, vco4.N);
     vco4.theta += vco4.step;
     
-    vco1.out = K.sqr12(vco1.theta, vco1.N);
-    vco2.out = K.saw12(vco2.theta, vco2.N);
-    vco3.out = K.tri12(vco3.theta, vco3.N);
-    vco4.out = K.sqr12(vco4.theta, vco4.N);
+    vco1.out = H.sqr12(vco1.theta, vco1.N);
+    vco2.out = H.saw12(vco2.theta, vco2.N);
+    vco3.out = H.tri12(vco3.theta, vco3.N);
+    vco4.out = H.sqr12(vco4.theta, vco4.N);
     
     out = 0.25 * (vco1.out + vco2.out + vco3.out + vco4.out);
     
@@ -67,7 +68,7 @@ window.onload = function () {
   self.audioContext = new AudioContext();
 
   self.nx = NexusUI;
-  self.K = new kMath();
+  self.H = new H();
   self.out = 0;
 
   self.playToggle = new nx.TextButton("toggle-play", {
@@ -80,19 +81,6 @@ window.onload = function () {
     views.style.opacity = "1.0";
     self.playToggle.state = true;
   }
-
-  self.topRackToggle = new nx.Toggle("toggle-toprack", {
-    size: [40, 20],
-    state: false,
-  });
-
-  self.topRackToggle.on("change", function (v) {
-    if (v) {
-      document.getElementById("toprack").className = "visible";
-    } else {
-      document.getElementById("toprack").className = "";
-    }
-  });
 
   self.editorToggle = new nx.Toggle("#toggle-editor", {
     size: [40, 20],
