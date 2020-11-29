@@ -217,7 +217,7 @@ AnalyserView.prototype.initGL = function () {
   this.canvas = canvas;
 
   // var gl = create3DDebugContext(canvas.getContext("experimental-webgl"));
-  var gl = canvas.getContext("experimental-webgl");
+  var gl = canvas.getContext("webgl");
   this.gl = gl;
 
   // If we're missing this shader feature, then we can't do the 3D visualization.

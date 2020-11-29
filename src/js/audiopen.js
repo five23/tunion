@@ -5,7 +5,7 @@
 /*----------------------------------*/
 
 //import { kMath } from "./kmath";
-import { H } from "./harmonic"
+import { H } from "./harmonic";
 import { AnalyserView } from "./analyser";
 import { Delay } from "./delay";
 
@@ -15,6 +15,8 @@ import "ace-builds/src-noconflict/mode-javascript";
 import NexusUI from "nexusui";
 
 import jsWorkerUrl from "file-loader!ace-builds/src-noconflict/worker-javascript";
+
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 const defaultRack = `function process(buffer) {  
   for (var t = 0; t < buffer.length; ++t) {    
@@ -60,13 +62,10 @@ const defaultRack = `function process(buffer) {
 /**
  * onload
  */
-window.onload = function () {
-  var views = document.getElementById("views");
+window.onload = () => {
+  const views = document.getElementById("views");
 
-  var AudioContext = window.AudioContext || window.webkitAudioContext;
-
-  self.audioContext = new AudioContext();
-
+  self.audioCtx = audioCtx;
   self.nx = NexusUI;
   self.H = new H();
   self.out = 0;
@@ -77,9 +76,10 @@ window.onload = function () {
     size: [32, 32],
   });
 
-  if (self.audioContext.state === "running") {
-    views.style.opacity = "1.0";
-    self.playToggle.state = true;
+  if (self.audioCtx.state === "running") {
+    views.style.opacity = "0.0";
+    self.playToggle.state = false;
+    self.audioCtx.suspend();
   }
 
   self.editorToggle = new nx.Toggle("#toggle-editor", {
@@ -87,7 +87,7 @@ window.onload = function () {
     state: false,
   });
 
-  self.editorToggle.on("change", function (v) {
+  self.editorToggle.on("change", (v) => {
     if (v) {
       document.getElementById("editor").className =
         "ace_editor ace_hidpi ace-tm visible";
@@ -130,105 +130,9 @@ window.onload = function () {
     options: ["frequency", "sonogram", "3d sonogram", "waveform"],
   });
 
-  view1sel.on("change", function (v) {
-    audiopen.analyserView.setAnalysisType(v.index);
+  view1sel.on("change", ({ index }) => {
+    audiopen.analyserView.setAnalysisType(index);
   });
-
-  self.vco1pos = new nx.Position("#vco1pos", {
-    size: [192, 192],
-    x: 0.0,
-    minX: 0,
-    maxX: 1,
-    stepX: 0.00001,
-    y: 0.0,
-    minY: 0,
-    maxY: 1,
-    stepY: 0.00001,
-  });
-
-  /*  self.vco1sld = new nx.Multislider("#vco1sld", {
-    size: [192, 192],
-    numberOfSliders: 4,
-    min: 0,
-    max: 1,
-    step: 0,
-    candycane: 3,
-    values: [0, 0, 0, 0],
-    smoothing: 0,
-    mode: "bar", // 'bar' or 'line'
-  });*/
-
-  self.vco2pos = new nx.Position("#vco2pos", {
-    size: [192, 192],
-    x: 0.0,
-    minX: 0,
-    maxX: 1,
-    stepX: 0.00001,
-    y: 0.0,
-    minY: 0,
-    maxY: 1,
-    stepY: 0.00001,
-  });
-
-  /*self.vco2sld = new nx.Multislider("#vco2sld", {
-    size: [192, 192],
-    numberOfSliders: 4,
-    min: 0,
-    max: 1,
-    step: 0,
-    candycane: 3,
-    values: [0, 0, 0, 0],
-    smoothing: 0,
-    mode: "bar", // 'bar' or 'line'
-  });*/
-
-  self.vco3pos = new nx.Position("#vco3pos", {
-    size: [192, 192],
-    x: 0.0,
-    minX: 0,
-    maxX: 1,
-    stepX: 0.00001,
-    y: 0.0,
-    minY: 0,
-    maxY: 1,
-    stepY: 0.00001,
-  });
-
-  /*self.vco3sld = new nx.Multislider("#vco3sld", {
-    size: [192, 192],
-    numberOfSliders: 4,
-    min: 0,
-    max: 1,
-    step: 0,
-    candycane: 3,
-    values: [0, 0, 0, 0],
-    smoothing: 0,
-    mode: "bar", // 'bar' or 'line'
-  });*/
-
-  self.vco4pos = new nx.Position("#vco4pos", {
-    size: [192, 192],
-    x: 0.0,
-    minX: 0,
-    maxX: 1,
-    stepX: 0.00001,
-    y: 0.0,
-    minY: 0,
-    maxY: 1,
-    stepY: 0.00001,
-  });
-
-  /*self.vco4sld = new nx.Multislider("#vco4sld", {
-    size: [192, 192],
-    numberOfSliders: 4,
-    min: 0,
-    max: 1,
-    step: 0,
-    candycane: 3,
-    values: [0, 0, 0, 0],
-    smoothing: 0,
-    mode: "bar", // 'bar' or 'line'
-  });*/
 
   self.view1 = new nx.Oscilloscope("#view1", {
     size: [384, 222],
@@ -238,51 +142,31 @@ window.onload = function () {
     size: [384, 222],
   });
 
-  self.aux0dial = new nx.Dial("#aux0dial", {
-    size: [96, 96],
-    interaction: "radial", // "radial", "vertical", or "horizontal"
-    mode: "relative", // "absolute" or "relative"
-    min: 0,
-    max: 1,
-    step: 0,
-    value: 0,
-  });
+  let audiopen = new AudioPen();
 
-  self.aux1dial = new nx.Dial("#aux1dial", {
-    size: [96, 96],
-    interaction: "radial", // "radial", "vertical", or "horizontal"
-    mode: "relative", // "absolute" or "relative"
-    min: 0,
-    max: 1,
-    step: 0,
-    value: 0,
-  });
+  window.audiopen = audiopen;  
+  window.vco1pos = audiopen.vco1pos;
+  window.vco2pos = audiopen.vco2pos;  
+  window.vco3pos = audiopen.vco3pos;
+  window.vco4pos = audiopen.vco4pos;
 
-  self.aux2dial = new nx.Dial("#aux2dial", {
-    size: [96, 96],
-    interaction: "radial", // "radial", "vertical", or "horizontal"
-    mode: "relative", // "absolute" or "relative"
-    min: 0,
-    max: 1,
-    step: 0,
-    value: 0,
-  });
+  window.aux0dial = audiopen.aux0dial;
+  window.aux1dial = audiopen.aux1dial;
+  window.aux2dial = audiopen.aux2dial;
 
-  self.delayOut = 0;
-  self.delay = Delay(16384);
+  window.delay = self.audiopen.delay;
 
-  self.audiopen = new AudioPen();
   self.audiopen.start();
 
   self.playToggle.on("change", (v) => {
     if (v) {
-      if (self.audioContext.state === "suspended") {
-        self.audioContext.resume();
+      if (self.audioCtx.state === "suspended") {
+        self.audioCtx.resume();
       }
       views.style.opacity = "1.0";
     } else {
-      if (self.audioContext.state === "running") {
-        self.audioContext.suspend();
+      if (self.audioCtx.state === "running") {
+        self.audioCtx.suspend();
       }
       views.style.opacity = "0.0";
     }
@@ -292,40 +176,42 @@ window.onload = function () {
 /**
  * AudioPen
  */
-function AudioPen() {
-  this.editor;
-  this.editorToggle;
-  this.analyser;
-  this.analyserView = new AnalyserView({
-    canvasElementID: "view1crt",
-  });
-  this.apiFunctionNames = ["process"];
-  this.isPlaying = false;
-  this.compiledCode = null;
-  this.codeLastChanged = 0;
-  this.codeLastCompiled = 0;
-  this.compilationDelay = 1e2;
-  this.sampleRate = 44100;
-  this.bufferSize = 2048;
-  this.t = 0;
-}
+class AudioPen {
+  constructor() {
+    this.initDelay();
+    this.initPositionQuad();
+    this.editor;
+    this.editorToggle;
+    this.analyser;
+    this.analyserView = new AnalyserView({
+      canvasElementID: "view1crt",
+    });
+    this.apiFunctionNames = ["process"];
+    this.isPlaying = false;
+    this.compiledCode = null;
+    this.codeLastChanged = 0;
+    this.codeLastCompiled = 0;
+    this.compilationDelay = 1e3;
+    this.sampleRate = 44100;
+    this.bufferSize = 2048;
+    this.t = 0;
+  }
 
-AudioPen.prototype = {
   /**
    * start
    */
-  start: function () {
-    var self = this;
+  start() {
+    const self = this;
 
-    this.audioContext = window.audioContext;
+    this.audioCtx = window.audioCtx;
 
-    this.initAceEditor();
+    this.initEditor();
     this.compileCode();
 
     this.channelCount = 2;
 
-    this.gainNode = this.audioContext.createGain();
-    this.scriptNode = this.audioContext.createScriptProcessor(
+    this.gainNode = this.audioCtx.createGain();
+    this.scriptNode = this.audioCtx.createScriptProcessor(
       this.bufferSize,
       1,
       1
@@ -334,10 +220,10 @@ AudioPen.prototype = {
       self.executeCode(audioProcessingEvent);
     };
 
-    this.analyser = this.audioContext.createAnalyser();
+    this.analyser = this.audioCtx.createAnalyser();
 
     this.scriptNode.connect(self.analyser);
-    this.scriptNode.connect(self.audioContext.destination);
+    this.scriptNode.connect(self.audioCtx.destination);
 
     window.view1.connect(self.scriptNode);
     window.spec1.connect(self.scriptNode);
@@ -348,13 +234,13 @@ AudioPen.prototype = {
     document.body.style.visibility = "visible";
 
     this.mainLoop();
-  },
+  }
 
   /**
-   * initAceEditor
+   * initEditor
    */
-  initAceEditor: function () {
-    var self = this;
+  initEditor() {
+    const self = this;
 
     ace.config.setModuleUrl("ace/mode/javascript_worker", jsWorkerUrl);
 
@@ -362,36 +248,133 @@ AudioPen.prototype = {
     this.editor.setShowPrintMargin(false);
     this.editor.getSession().setMode("ace/mode/javascript");
     this.editor.setValue(defaultRack, -1);
-    this.editor.on("change", function (e) {
+    this.editor.on("change", (e) => {      
       self.codeLastChanged = Date.now();
     });
-  },
+  }
+
+  initDelay() {
+
+    this.aux0dial = this.aux0dial || new nx.Dial("#aux0dial", {
+      size: [96, 96],
+      interaction: "radial", // "radial", "vertical", or "horizontal"
+      mode: "relative", // "absolute" or "relative"
+      min: 0,
+      max: 1,
+      step: 0,
+      value: 0,
+    });
+  
+    this.aux1dial = this.aux1dial || new nx.Dial("#aux1dial", {
+      size: [96, 96],
+      interaction: "radial", // "radial", "vertical", or "horizontal"
+      mode: "relative", // "absolute" or "relative"
+      min: 0,
+      max: 1,
+      step: 0,
+      value: 0,
+    });
+  
+    this.aux2dial = this.aux2dial || new nx.Dial("#aux2dial", {
+      size: [96, 96],
+      interaction: "radial", // "radial", "vertical", or "horizontal"
+      mode: "relative", // "absolute" or "relative"
+      min: 0,
+      max: 1,
+      step: 0,
+      value: 0,
+    });
+  
+    this.delayOut = 0;
+    this.delay = Delay(16384);
+  }
+  initPositionQuad() {
+
+    let rack = document.getElementsByClassName("rack")[0];
+
+    const padding = 20;    
+    const navHeight = 32;
+    const width = document.body.clientWidth;
+    const height = window.innerHeight - navHeight;
+    const quadWidth = width/2;
+    const quadHeight = height/2;
+
+    console.log(quadWidth);
+
+    this.vco1pos = this.vco1pos || new nx.Position("#vco1pos", {
+      size: [quadWidth, quadHeight],
+      x: 0.0,
+      minX: 0,
+      maxX: 1,
+      stepX: 0.00001,
+      y: 0.0,
+      minY: 0,
+      maxY: 1,
+      stepY: 0.00001,
+    });
+
+    this.vco2pos = this.vco2pos || new nx.Position("#vco2pos", {
+      size: [quadWidth, quadHeight],
+      x: 0.0,
+      minX: 0,
+      maxX: 1,
+      stepX: 0.00001,
+      y: 0.0,
+      minY: 0,
+      maxY: 1,
+      stepY: 0.00001,
+    });
+
+    this.vco3pos = this.vco3pos || new nx.Position("#vco3pos", {
+      size: [quadWidth, quadHeight],
+      x: 0.0,
+      minX: 0,
+      maxX: 1,
+      stepX: 0.00001,
+      y: 0.0,
+      minY: 0,
+      maxY: 1,
+      stepY: 0.00001,
+    });
+
+    this.vco4pos = this.vco4pos || new nx.Position("#vco4pos", {
+      size: [quadWidth, quadHeight],
+      x: 0.0,
+      minX: 0,
+      maxX: 1,
+      stepX: 0.00001,
+      y: 0.0,
+      minY: 0,
+      maxY: 1,
+      stepY: 0.00001,
+    });
+  }
 
   /**
    * compileCode
    *
    * @returns
    */
-  compileCode: function () {
-    var self = this;
+  compileCode() {
+    const self = this;
 
-    var code = self.editor.getValue();
+    let code = self.editor.getValue();
 
     code += `return { process };`;
 
     try {
-      var pack = new Function(code)();
+      const pack = new Function(code)();
 
       self.compiledCode = pack;
       self.codeLastCompiled = Date.now();
 
       return true;
     } catch (e) {
-      console.log("Compilation failed: " + e.message + "\n" + e.stack);
+      console.log(`Compilation failed: ${e.message}\n${e.stack}`);
 
       return false;
     }
-  },
+  }
 
   /**
    * executeCode
@@ -399,18 +382,18 @@ AudioPen.prototype = {
    * @param {*} audioProcessingEvent
    * @returns
    */
-  executeCode: function (audioProcessingEvent) {
-    var self = this;
-    var buffer = audioProcessingEvent.outputBuffer.getChannelData(0);
+  executeCode({ outputBuffer }) {
+    const self = this;
+    let buffer = outputBuffer.getChannelData(0);
     buffer = this.compiledCode.process(buffer);
     this.analyserView.doFrequencyAnalysis(self.analyser);
-  },
+  }
 
   /**
    * mainLoop
    */
-  mainLoop: function () {
-    var self = this;
+  mainLoop() {
+    const self = this;
     requestAnimationFrame(() => {
       self.mainLoop();
     });
@@ -420,5 +403,5 @@ AudioPen.prototype = {
     ) {
       this.compileCode();
     }
-  },
-};
+  }
+}

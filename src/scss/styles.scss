@@ -1,12 +1,17 @@
-body {
-  padding: 10px;
+html {
   margin: 0;
-  background-color: #fefefe;
-  color: #333;
+  padding: 0;
+}
+
+body {
+  padding: 0;
+  margin: 0;
+  background-color: #fefefe;  color: #333;
   font: 12px / normal "Monaco", "Menlo", "Ubuntu Mono", "Consolas",
     "source-code-pro", monospace;
   visibility: hidden;
 }
+
 
 #editor {
   font-size: 15px;
@@ -45,7 +50,7 @@ body {
 
 .rack {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
 }
 
 #views {
