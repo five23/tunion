@@ -9,7 +9,7 @@ import { H } from "./harmonic";
 import { AnalyserView } from "./analyser";
 import { Delay } from "./delay";
 
-import "ace-builds/src-noconflict/ace";
+import ace from "ace-builds/src-noconflict/ace";
 import "ace-builds/src-noconflict/mode-javascript";
 
 import NexusUI from "nexusui";
@@ -52,12 +52,14 @@ const defaultRack = `function process(buffer) {
     buffer[t] = 0.5 * (out + delay.dO);
 
     // drift
-    vco1.theta *= 1.00000001;
-    vco2.theta *= 0.99999998;
-    vco3.theta *= 1.00000001;
-    vco4.theta *= 0.99999998;
+    vco1.theta *= 1.00000002436537;
+    vco2.theta *= 0.99999998487422;
+    vco3.theta *= 1.00000003234211;
+    vco4.theta *= 0.99999998234358;
   }
 }`;
+
+window.addEventListener("resize", (e) => console.log(e));
 
 /**
  * onload
@@ -70,7 +72,7 @@ window.onload = () => {
   self.H = new H();
   self.out = 0;
 
-  self.playToggle = new nx.TextButton("toggle-play", {
+  self.playToggle = new NexusUI.TextButton("toggle-play", {
     text: "▶",
     alternateText: "⏹",
     size: [32, 32],
@@ -82,7 +84,7 @@ window.onload = () => {
     self.audioCtx.suspend();
   }
 
-  self.editorToggle = new nx.Toggle("#toggle-editor", {
+  self.editorToggle = new NexusUI.Toggle("#toggle-editor", {
     size: [40, 20],
     state: false,
   });
@@ -94,6 +96,32 @@ window.onload = () => {
     } else {
       document.getElementById("editor").className =
         "ace_editor ace_hidpi ace-tm";
+    }
+  });
+
+  self.effectsToggle = new NexusUI.Toggle("#toggle-effects", {
+    size: [40, 20],
+    state: false,
+  });
+
+  self.effectsToggle.on("change", (v) => {
+    if (v) {
+      document.getElementById("effects").className = "visible";
+    } else {
+      document.getElementById("effects").className = "";
+    }
+  });
+
+  self.viewerToggle = new NexusUI.Toggle("#toggle-viewer", {
+    size: [40, 20],
+    state: false,
+  });
+
+  self.viewerToggle.on("change", (v) => {
+    if (v) {
+      document.getElementById("viewer").className = "visible";
+    } else {
+      document.getElementById("viewer").className = "";
     }
   });
 
@@ -125,38 +153,28 @@ window.onload = () => {
     out: 0,
   };
 
-  self.view1sel = new nx.Select("#view1sel", {
-    size: [128, 32],
-    options: ["frequency", "sonogram", "3d sonogram", "waveform"],
-  });
-
-  view1sel.on("change", ({ index }) => {
-    audiopen.analyserView.setAnalysisType(index);
-  });
-
-  self.view1 = new nx.Oscilloscope("#view1", {
-    size: [384, 222],
-  });
-
-  self.spec1 = new nx.Spectrogram("#spec1", {
-    size: [384, 222],
-  });
-
   let audiopen = new AudioPen();
 
-  window.audiopen = audiopen;  
-  window.vco1pos = audiopen.vco1pos;
-  window.vco2pos = audiopen.vco2pos;  
-  window.vco3pos = audiopen.vco3pos;
-  window.vco4pos = audiopen.vco4pos;
+  self.vco1pos = audiopen.vco1pos;
+  self.vco2pos = audiopen.vco2pos;
+  self.vco3pos = audiopen.vco3pos;
+  self.vco4pos = audiopen.vco4pos;
 
-  window.aux0dial = audiopen.aux0dial;
-  window.aux1dial = audiopen.aux1dial;
-  window.aux2dial = audiopen.aux2dial;
+  self.aux0dial = audiopen.aux0dial;
+  self.aux1dial = audiopen.aux1dial;
+  self.aux2dial = audiopen.aux2dial;
 
-  window.delay = self.audiopen.delay;
+  self.delay = audiopen.delay;
 
-  self.audiopen.start();
+  audiopen.start();
+
+  window.addEventListener(
+    "resize",
+    () => {
+      audiopen.resizePositionQuad();
+    },
+    true
+  );
 
   self.playToggle.on("change", (v) => {
     if (v) {
@@ -180,6 +198,8 @@ class AudioPen {
   constructor() {
     this.initDelay();
     this.initPositionQuad();
+    this.initViewer();
+    this.initMidi();
     this.editor;
     this.editorToggle;
     this.analyser;
@@ -225,8 +245,8 @@ class AudioPen {
     this.scriptNode.connect(self.analyser);
     this.scriptNode.connect(self.audioCtx.destination);
 
-    window.view1.connect(self.scriptNode);
-    window.spec1.connect(self.scriptNode);
+    this.view1.connect(self.scriptNode);
+    this.spec1.connect(self.scriptNode);
 
     this.analyserView.initByteBuffer(self.analyser);
     this.amplitudeData = new Uint8Array(self.analyser.frequencyBinCount);
@@ -248,60 +268,147 @@ class AudioPen {
     this.editor.setShowPrintMargin(false);
     this.editor.getSession().setMode("ace/mode/javascript");
     this.editor.setValue(defaultRack, -1);
-    this.editor.on("change", (e) => {      
+    this.editor.on("change", () => {
       self.codeLastChanged = Date.now();
     });
   }
 
-  initDelay() {
+  initViewer() {
+    let self = this;
 
-    this.aux0dial = this.aux0dial || new nx.Dial("#aux0dial", {
-      size: [96, 96],
-      interaction: "radial", // "radial", "vertical", or "horizontal"
-      mode: "relative", // "absolute" or "relative"
-      min: 0,
-      max: 1,
-      step: 0,
-      value: 0,
+    this.view1sel =
+      this.view1sel ||
+      new NexusUI.Select("#view1sel", {
+        size: [128, 32],
+        options: ["frequency", "sonogram", "3d sonogram", "waveform"],
+      });
+
+    this.view1sel.on("change", ({ index }) => {
+      self.analyserView.setAnalysisType(index);
     });
-  
-    this.aux1dial = this.aux1dial || new nx.Dial("#aux1dial", {
-      size: [96, 96],
-      interaction: "radial", // "radial", "vertical", or "horizontal"
-      mode: "relative", // "absolute" or "relative"
-      min: 0,
-      max: 1,
-      step: 0,
-      value: 0,
+
+    this.view1 = new NexusUI.Oscilloscope("#view1", {
+      size: [384, 222],
     });
-  
-    this.aux2dial = this.aux2dial || new nx.Dial("#aux2dial", {
-      size: [96, 96],
-      interaction: "radial", // "radial", "vertical", or "horizontal"
-      mode: "relative", // "absolute" or "relative"
-      min: 0,
-      max: 1,
-      step: 0,
-      value: 0,
+
+    this.spec1 = new NexusUI.Spectrogram("#spec1", {
+      size: [384, 222],
     });
-  
+  }
+
+  initMidi() {
+    let midiMessage = document.getElementById("midi");
+
+    const onMIDIAccess = (midiAccessObject) => {
+      let inputs = midiAccessObject.inputs.values();
+      for (
+        let input = inputs.next();
+        input && !input.done;
+        input = inputs.next()
+      ) {
+        input.value.onmidimessage = onMIDIMessage;
+      }
+    };
+
+    const MIDItoFreq = (b, a) =>
+      0 === a || (0 < a && 128 > a) ? Math.pow(2, (a - 69) / 12) * b : null;
+
+    const onMIDIMessage = (message) => {
+      let noteon = false;
+      let notemsg = "0, 0";
+      const note = message.data[1];
+      const pressure = message.data[2];
+      const frequency = MIDItoFreq(440, note);
+      if (pressure) {
+        noteon = true;
+      }
+      if (noteon) {
+        notemsg = `1, ${pressure}`;
+      }
+      midiMessage.innerHTML = `note: ${note}, msg: ${notemsg}, freq: ${frequency}`;
+    };
+
+    const onMIDIAccessFailure = (err) => {
+      console.log(
+        `No MIDI devices are available, or Web MIDI isn’t supported by this browser.`
+      );
+      console.log(
+        `Utilize Chris Wilson’s Web MIDI API Polyfill in order to use the Web MIDI API: http://cwilso.github.io/WebMIDIAPIShim/`
+      );
+      console.log(err);
+    };
+
+    if (navigator.requestMIDIAccess) {
+      navigator
+        .requestMIDIAccess({ sysex: false })
+        .then(onMIDIAccess, onMIDIAccessFailure);
+    } else {
+      console.warn(`This browser does not support MIDI.`);
+    }
+  }
+
+  initDelay() {
+    this.aux0dial =
+      this.aux0dial ||
+      new NexusUI.Dial("#aux0dial", {
+        size: [96, 96],
+        interaction: "radial", // "radial", "vertical", or "horizontal"
+        mode: "relative", // "absolute" or "relative"
+        min: 0,
+        max: 1,
+        step: 0,
+        value: 0,
+      });
+
+    this.aux1dial =
+      this.aux1dial ||
+      new NexusUI.Dial("#aux1dial", {
+        size: [96, 96],
+        interaction: "radial", // "radial", "vertical", or "horizontal"
+        mode: "relative", // "absolute" or "relative"
+        min: 0,
+        max: 1,
+        step: 0,
+        value: 0,
+      });
+
+    this.aux2dial =
+      this.aux2dial ||
+      new NexusUI.Dial("#aux2dial", {
+        size: [96, 96],
+        interaction: "radial", // "radial", "vertical", or "horizontal"
+        mode: "relative", // "absolute" or "relative"
+        min: 0,
+        max: 1,
+        step: 0,
+        value: 0,
+      });
+
     this.delayOut = 0;
     this.delay = Delay(16384);
   }
-  initPositionQuad() {
-
-    let rack = document.getElementsByClassName("rack")[0];
-
-    const padding = 20;    
+  resizePositionQuad() {
+    const padding = 40;
     const navHeight = 32;
-    const width = document.body.clientWidth;
-    const height = window.innerHeight - navHeight;
-    const quadWidth = width/2;
-    const quadHeight = height/2;
+    const width = document.body.clientWidth - padding;
+    const height = window.innerHeight - navHeight - padding;
+    const quadWidth = width / 2;
+    const quadHeight = height / 2;
 
-    console.log(quadWidth);
+    this.vco1pos.resize(quadWidth, quadHeight);
+    this.vco2pos.resize(quadWidth, quadHeight);
+    this.vco3pos.resize(quadWidth, quadHeight);
+    this.vco4pos.resize(quadWidth, quadHeight);
+  }
+  initPositionQuad() {
+    const padding = 40;
+    const navHeight = 32;
+    const width = document.body.clientWidth - padding;
+    const height = window.innerHeight - navHeight - padding;
+    const quadWidth = width / 2;
+    const quadHeight = height / 2;
 
-    this.vco1pos = this.vco1pos || new nx.Position("#vco1pos", {
+    this.vco1pos = new NexusUI.Position("#vco1pos", {
       size: [quadWidth, quadHeight],
       x: 0.0,
       minX: 0,
@@ -313,7 +420,7 @@ class AudioPen {
       stepY: 0.00001,
     });
 
-    this.vco2pos = this.vco2pos || new nx.Position("#vco2pos", {
+    this.vco2pos = new NexusUI.Position("#vco2pos", {
       size: [quadWidth, quadHeight],
       x: 0.0,
       minX: 0,
@@ -325,7 +432,7 @@ class AudioPen {
       stepY: 0.00001,
     });
 
-    this.vco3pos = this.vco3pos || new nx.Position("#vco3pos", {
+    this.vco3pos = new NexusUI.Position("#vco3pos", {
       size: [quadWidth, quadHeight],
       x: 0.0,
       minX: 0,
@@ -337,7 +444,7 @@ class AudioPen {
       stepY: 0.00001,
     });
 
-    this.vco4pos = this.vco4pos || new nx.Position("#vco4pos", {
+    this.vco4pos = new NexusUI.Position("#vco4pos", {
       size: [quadWidth, quadHeight],
       x: 0.0,
       minX: 0,
@@ -385,6 +492,7 @@ class AudioPen {
   executeCode({ outputBuffer }) {
     const self = this;
     let buffer = outputBuffer.getChannelData(0);
+    // eslint-disable-next-line no-unused-vars
     buffer = this.compiledCode.process(buffer);
     this.analyserView.doFrequencyAnalysis(self.analyser);
   }

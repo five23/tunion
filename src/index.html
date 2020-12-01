@@ -14,15 +14,36 @@
   >
     <header class="navbar">
       <div class="item">
-        <label>e:</label>
+        <label>editor:</label>
         <div id="toggle-editor"></div>
+      </div>
+      <div class="item">
+        <label>effects:</label>
+        <div id="toggle-effects"></div>
+      </div>
+      <div class="item">
+        <label>viewer:</label>
+        <div id="toggle-viewer"></div>
       </div>
       <div class="item">
         <div id="toggle-play"></div>
       </div>
+      <div class="item">
+        <span id="midi"></span>
+      </div>
     </header>
     <main class="rack">
-      <div class="item" id="vco1pos"></div>
+      <div class="content-item">
+        <div class="overlay"></div>
+        
+        <div class="corner-overlay-content">Info</div>
+        
+        <div class="overlay-content">
+          <h2>Image Ink Logo</h2>
+          <p>Logo for a screen printing company. They wanted a detachable/recognizable brand that didn't need the name of the company.</p>
+        </div>
+        <div class="item" id="vco1pos"></div>
+      </div>
       <div class="item" id="vco2pos"></div>
       <div class="item" id="vco3pos"></div>
       <div class="item" id="vco4pos"></div>
@@ -47,24 +68,25 @@
           <div class="item" id="aux0dial"></div>
           <div class="item" id="aux1dial"></div>
           <div class="item" id="aux2dial"></div>
-        </div>
-      <div class="viewer" id="views">
-        <div class="fieldset">
-          <div class="header">
-            <div id="view1sel"></div>
-          </div>
-          <div class="item">
-            <canvas id="view1crt"></canvas>
-          </div>
-        </div>
-        <div class="fieldset">
-          <div class="item" id="view1"></div>
-        </div>
-        <div class="fieldset">
-          <div class="item" id="spec1"></div>
-        </div>
-      </div>
+        </div>      
     </main>
     <section class="right-rack" id="editor"></section>
+    <section class="right-rack" id="viewer"><div class="viewer" id="views">
+      <div class="fieldset">
+        <div class="header">
+          <div id="view1sel"></div>
+        </div>
+        <div class="item">
+          <canvas id="view1crt"></canvas>
+        </div>
+      </div>
+      <div class="fieldset hidden">
+        <div class="item" id="view1"></div>
+      </div>
+      <div class="fieldset hidden">
+        <div class="item" id="spec1"></div>
+      </div>
+    </div></section>
+    <section class="right-rack" id="effects"></section>
   </body>
 </html>
