@@ -1,30 +1,86 @@
-// Simple delay circuit (via opendsp)
-export function Delay(size) {
-  if (!(this instanceof Delay)) return new Delay(size);
-  size = size || 16384;
-  this.buffer = new Float32Array(size);
-  this.size = size;
-  this.counter = 0;
-  this._feedback = 0.5;
-  this._delay = 16384;
-  this.d0 = 0;
-  this.d1 = 0;
-  this.d2 = 0;
+import Vec2 from "vec2";
+
+class LPF {
+  constructor(z) {
+    if (!z) this.z = 0.998;
+    else this.z = z;
+    this.out = 0;
+  }
+  run(n, x) {
+    return x + (n - x) * this.z;
+  }
 }
 
+let lpf = new LPF(0.998);
+
+/**
+ * Delay
+ *
+ * @export
+ * @param {*} size
+ * @return {*} 
+ */
+export function Delay(size) {
+  if (!(this instanceof Delay)) return new Delay(size);
+  size = size || 32768;
+  this.buffer = new Float32Array(size);
+  this.size = size;
+  this.k = 0;
+  this._gain = new Vec2(0, 0);
+  this._feed = new Vec2(0, 0);
+  this._time = new Vec2(0, 0);
+}
+
+/**
+ * Set delay output gain
+ *
+ * @param {*} n
+ * @return {*} 
+ */
+Delay.prototype.gain = function (n) {
+  this._gain.x = n;
+  return this;
+};
+
+/**
+ * Set delay feedback (0...0.9999)
+ *
+ * @param {*} n
+ * @return {*} 
+ */
 Delay.prototype.feedback = function (n) {
-  this._feedback = n;
+  this._feed.x = n;
   return this;
 };
 
-Delay.prototype.delay = function (n) {
-  this._delay = n;
+/**
+ * Set delay time (0...32000)
+ *
+ * @param {*} n
+ * @return {*} 
+ */
+Delay.prototype.time = function (n) {
+  this._time.x = n;
   return this;
 };
 
+/**
+ * Process
+ *
+ * @param {*} inp
+ * @return {*} 
+ */
 Delay.prototype.run = function (inp) {
-  var back = this.counter - this._delay;
-  if (back < 0) back = this.size + back;
+  this._gain.y = lpf.run(this._gain.x, this._gain.y);
+  this._feed.y = lpf.run(this._feed.x, this._feed.y);
+  this._time.y = lpf.run(this._time.x, this._time.y);
+
+  var back = this.k - this._time.y;
+
+  if (back < 0) {
+    back = this.size + back;
+  }
+
   var index0 = Math.floor(back);
 
   var index_1 = index0 - 1;
@@ -49,11 +105,11 @@ Delay.prototype.run = function (inp) {
 
   var out = ((c3 * x + c2) * x + c1) * x + c0;
 
-  this.buffer[this.counter] = inp + out * this._feedback;
+  this.buffer[this.k] = inp + out * this._feed.x;
 
-  this.counter++;
+  this.k++;
 
-  if (this.counter >= this.size) this.counter = 0;
+  if (this.k >= this.size) this.k = 0;
 
-  return out;
+  return this._gain.y * out;
 };

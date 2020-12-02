@@ -1,7 +1,5 @@
-class H {
-  constructor(precision, method) {
-    this.PRECISION = precision || 12;
-
+export class H {
+  constructor() {    
     this.TAU = 6.28318530717958647692528676655901; // @constant {Number} 2 pi
     this.GAMMA = 0.5772156649015328606065120900824; // @constant {Number} lim_(n->infty)(H_n-lnn)
     this.ZETA2 = 1.64493406684822643647241516664603; // @constant {Number} zeta(2)
@@ -192,13 +190,13 @@ class H {
    * @param {Number} x
    * @return {Number}
    */
-  digamma12(x) {
+  digamma12(x, PRECISION) {
     let v = 0;
 
     /* TODO: this should return Complex Infinity */
-    if (Math.abs(x) < Number.EPSILON || (Number.isInteger(x) && x < 0)) {
-      return Infinity;
-    }
+    //if (Math.abs(x) < Number.EPSILON || (Number.isInteger(x) && x < 0)) {
+    //  return Infinity;
+    //}
     /* Special values at positive integers (table lookup) */
     if (Number.isInteger(x) && x < 12) {
       return this.GAMMAINT[x - 1] - this.GAMMA;
@@ -219,7 +217,7 @@ class H {
       }
     }
 
-    for (; this.PRECISION > x; x += 1) {
+    for (; PRECISION > x; x += 1) {
       v -= 1.0 / x;
     }
 
@@ -277,15 +275,18 @@ class H {
    * @param {Number} N Partials
    * @return {Number}
    */
-  sqr12(x, N) {
-    if (!N) N = 4;
+  sqr12(x, N, P) {
+    if (!P) P = 12;
     x *= this.OMEGA;
-    var c = Math.cos(x);
-    const b = 4 * N * c;
-    var c = this.digamma12(0.75 - b) - this.digamma12(0.25 - b);
-    const v = Math.cos(this.TAU * b) * (c / Math.PI) - 1;
-    return 0.5 * v;
+    const c = Math.cos(x);
+    const b = 12 * N * c;
+    const d0 = this.digamma12(3/4 - b, P);
+    const d1 = this.digamma12(1/4 - b, P);
+    const d = (d0 - d1) / Math.PI;
+    const v = Math.cos(this.TAU * b) * d - 1;
+    return v/2;
   }
+
 
   /**
    * Precision Sawtooth Wave Approximation
@@ -295,10 +296,23 @@ class H {
    * @return {Number}
    */
   saw12(x, N) {
-    if (!N) N = 4;
     const v = Math.sin(x * this.OMEGA) * this.sqr12(x, N);
     return v;
   }
+
+
+  /**
+   * Precision Reverse Sawtooth Wave Approximation
+   *
+   * @param {Number} x
+   * @param {Number} N Partials
+   * @return {Number}
+   */
+  revsaw12(x, N) {
+    const v = Math.sin(x * this.OMEGA) * this.sqr12(x, -N);
+    return v;
+  }
+
 
   /**
    * Precision Triangle Wave Approximation
@@ -311,7 +325,6 @@ class H {
    * @return {Number}
    */
   tri12(x, N) {
-    if (!N) N = 4;
     const v = this.sqr12(x, N) * this.saw12(x, N);
     return 1.5 * v;
   }
@@ -328,5 +341,3 @@ class H {
     return x + (n - x) * z;
   }
 }
-
-export { H };

@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="description" content="uni0n" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="shortcut icon" href="./favicon.ico">
+    <link rel="shortcut icon" href="./favicon.ico" />
   </head>
   <body
     style="-webkit-user-select: none"
@@ -18,12 +18,20 @@
         <div id="toggle-editor"></div>
       </div>
       <div class="item">
+        <label>feedback:</label>
+        <div id="toggle-feedback"></div>
+      </div>
+      <div class="item">
         <label>effects:</label>
         <div id="toggle-effects"></div>
       </div>
       <div class="item">
-        <label>viewer:</label>
-        <div id="toggle-viewer"></div>
+        <label>vis:</label>
+        <div id="toggle-vis"></div>
+      </div>
+      <div class="item">
+        <label>glvis:</label>
+        <div id="toggle-glvis"></div>
       </div>
       <div class="item">
         <div id="toggle-play"></div>
@@ -33,60 +41,43 @@
       </div>
     </header>
     <main class="rack">
-      <div class="content-item">
-        <div class="overlay"></div>
-        
-        <div class="corner-overlay-content">Info</div>
-        
-        <div class="overlay-content">
-          <h2>Image Ink Logo</h2>
-          <p>Logo for a screen printing company. They wanted a detachable/recognizable brand that didn't need the name of the company.</p>
-        </div>
-        <div class="item" id="vco1pos"></div>
-      </div>
-      <div class="item" id="vco2pos"></div>
-      <div class="item" id="vco3pos"></div>
-      <div class="item" id="vco4pos"></div>
+      <div class="item" id="vco1"></div>
+      <div class="item" id="vco2"></div>
+      <div class="item" id="vco3"></div>
+      <div class="item" id="vco4"></div>
     </main>
-      <!--div class="controls">
-        <div class="fieldset">
-          <div class="item" id="vco1sld"></div>
-        </div>
-        <div class="fieldset">
-          
-          <div class="item" id="vco2sld"></div>
-        </div>
-        <div class="fieldset">
-          <div class="item" id="vco3pos"></div>
-          <div class="item" id="vco3sld"></div>
-        </div>
-        <div class="fieldset">
-          <div class="item" id="vco4pos"></div>
-          <div class="item" id="vco4sld"></div>
-        </div-->
-        <div class="fieldset hidden">
-          <div class="item" id="aux0dial"></div>
-          <div class="item" id="aux1dial"></div>
-          <div class="item" id="aux2dial"></div>
-        </div>      
-    </main>
-    <section class="right-rack" id="editor"></section>
-    <section class="right-rack" id="viewer"><div class="viewer" id="views">
-      <div class="fieldset">
-        <div class="header">
-          <div id="view1sel"></div>
-        </div>
-        <div class="item">
-          <canvas id="view1crt"></canvas>
-        </div>
+    <section class="editor">
+      <div id="ace-editor"></div>
+    </section>
+    <section class="vis">
+      <div class="item" id="view1"></div>
+      <div class="item" id="spec1"></div>
+    </section>
+    <section class="glvis">
+      <div class="header">
+        <div id="view1sel"></div>
       </div>
-      <div class="fieldset hidden">
-        <div class="item" id="view1"></div>
+      <div class="item">
+        <canvas id="view1crt"></canvas>
       </div>
-      <div class="fieldset hidden">
-        <div class="item" id="spec1"></div>
-      </div>
-    </div></section>
-    <section class="right-rack" id="effects"></section>
+    </section>
+    <section class="effects">
+      <label>delay gain</label>
+      <div class="item" id="d0gain"></div>
+      <label>delay feedback</label>
+      <div class="item" id="d0feedback"></div>
+      <label>delay time</label>
+      <div class="item" id="d0time"></div>
+    </section>
+    <section class="feedback">
+      <label>vco1</label>
+      <div class="item" id="vco1mat"></div>
+      <label>vco2</label>
+      <div class="item" id="vco2mat"></div>
+      <label>vco3</label>
+      <div class="item" id="vco3mat"></div>
+      <label>vco4</label>
+      <div class="item" id="vco4mat"></div>
+    </section>
   </body>
 </html>

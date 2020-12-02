@@ -785,7 +785,7 @@
     "@babel/types" "^7.4.4"
     esutils "^2.0.2"
 
-"@babel/runtime@^7.8.4":
+"@babel/runtime@^7.12.5", "@babel/runtime@^7.8.4":
   version "7.12.5"
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.12.5.tgz#410e7e487441e1b360c29be715d870d9b985882e"
   integrity sha512-plcc+hbExy3McchJCEQG3knOsuh3HH+Prx1P6cLIkET/0dLuQDEnrT+s27Axgc9bqfsmNUNHfscgMUdBpC9xfg==
@@ -1284,6 +1284,14 @@ astral-regex@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/astral-regex/-/astral-regex-1.0.0.tgz#6c8c3fb827dd43ee3918f27b82782ab7658a6fd9"
   integrity sha512-+Ryf6g3BKoRc7jfp7ad8tM4TtMiaWvbF/1/sQcZPkkS7ag3D5nMBCe2UfOTONtAkaG0tO0ij3C5Lwmf1EiyjHg==
+
+automation-events@^3.0.2:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/automation-events/-/automation-events-3.0.3.tgz#08de5bdef461bd0c9ed6cd3a7a660afa7112cecd"
+  integrity sha512-iFZcgSVwp8JnSXCv15LQ/tyKEAm+ToBTseD3bYWwIUUUzWQGwUMKMmIm2hM+KlfC0qBZu1xj/WqidhqvGvA3sA==
+  dependencies:
+    "@babel/runtime" "^7.12.5"
+    tslib "^2.0.3"
 
 babel-code-frame@^6.26.0:
   version "6.26.0"
@@ -3831,6 +3839,15 @@ ssri@^8.0.0:
   dependencies:
     minipass "^3.1.1"
 
+standardized-audio-context@^25.1.6:
+  version "25.1.6"
+  resolved "https://registry.yarnpkg.com/standardized-audio-context/-/standardized-audio-context-25.1.6.tgz#c1908fe6b8fe221cc2836c9873573474f7992ad0"
+  integrity sha512-iHvPiwbDctxpmP9sufnADBeiBpYc8km6i53TFGVGkc5usBmAJ8YNhATXXrSFZYR4MGxIImZGWCCH4LrPatPFrQ==
+  dependencies:
+    "@babel/runtime" "^7.12.5"
+    automation-events "^3.0.2"
+    tslib "^2.0.3"
+
 string-width@^3.0.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/string-width/-/string-width-3.1.0.tgz#22767be21b62af1081574306f69ac51b62203961"
@@ -4020,6 +4037,11 @@ tslib@^1.10.0, tslib@^1.8.1, tslib@^1.9.0:
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.14.1.tgz#cf2d38bdc34a134bcaf1091c41f6619e2f672d00"
   integrity sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==
 
+tslib@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.0.3.tgz#8e0741ac45fc0c226e58a17bfc3e64b9bc6ca61c"
+  integrity sha512-uZtkfKblCEQtZKBF6EBXVZeQNl82yqtDQdv+eck8u7tdPxjLu2/lp5/uPW+um2tpuxINHWy3GhiccY7QgEaVHQ==
+
 tsutils@^3.17.1:
   version "3.17.1"
   resolved "https://registry.yarnpkg.com/tsutils/-/tsutils-3.17.1.tgz#ed719917f11ca0dee586272b2ac49e015a2dd759"
@@ -4120,6 +4142,11 @@ v8-compile-cache@^2.0.3, v8-compile-cache@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/v8-compile-cache/-/v8-compile-cache-2.2.0.tgz#9471efa3ef9128d2f7c6a7ca39c4dd6b5055b132"
   integrity sha512-gTpR5XQNKFwOd4clxfnhaqvfqMpqEwr4tOtCyz4MtYZX2JYhfr1JvBFKdS+7K/9rfpZR3VLX+YWBbKoxCgS43Q==
+
+vec2@^1.6.1:
+  version "1.6.1"
+  resolved "https://registry.yarnpkg.com/vec2/-/vec2-1.6.1.tgz#45fad8384558fb103000e48d54e60c02804d181d"
+  integrity sha512-6/1i+Z2JSglrBQYCrjogt8f2X3pFXRpFOncMBrUL+T+640+bOBRRTXvZx3HUnaGelioNmfBLUnIIKdqwjO1hHw==
 
 vfile-location@^3.2.0:
   version "3.2.0"
