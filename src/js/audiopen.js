@@ -43,15 +43,12 @@ const defaultRack = `function process(buffer) {
     
     out = 0.25 * (vco1.out + vco2.out + vco3.out + vco4.out);
     
-    buffer[t] = 0.5 * (out + delay.gain(d0gain.value).feedback(d0feedback.value).time(d0time.value).run(out));
-    
-    // drift
-    vco1.theta *= 1.00000002436537;
-    vco2.theta *= 0.99999998487422;
-    vco3.theta *= 1.00000003234211;
-    vco4.theta *= 0.99999998234358;
-
     audiopen.processFeedbackMatrix();
+    audiopen.processDrift();
+    
+    const delayOut = delay.gain(d0gain.value).feedback(d0feedback.value).time(d0time.value).run(out);
+
+    buffer[t] = 0.5 * (out + delayOut);    
   }
 }`;
 
@@ -117,7 +114,7 @@ class AudioPen {
 
     this.view1crt = document.getElementById("view1crt");
     this.view1crt.width = 800;
-    this.view1crt.height = 244;
+    this.view1crt.height = 400;
     this.analyserView = new AnalyserView(this.view1crt);
     this.apiFunctionNames = ["process"];
     this.isPlaying = false;
@@ -316,7 +313,7 @@ class AudioPen {
     this.view1sel =
       this.view1sel ||
       new NexusUI.Select("#view1sel", {
-        size: [800, 32],
+        size: [800, 28],
         options: ["frequency", "sonogram", "3d sonogram", "waveform"],
       });
 
@@ -466,6 +463,12 @@ class AudioPen {
     });
   }
 
+
+  /**
+   * processDrift
+   *
+   * @memberof AudioPen
+   */
   processDrift() {
     this.vco1.theta *= 1.00000002;
     this.vco2.theta *= 0.99999998;
@@ -473,6 +476,12 @@ class AudioPen {
     this.vco4.theta *= 0.99999999;
   }
 
+
+  /**
+   * processFeedbackMatrix
+   *
+   * @memberof AudioPen
+   */
   processFeedbackMatrix() {
     let self = this;
 
