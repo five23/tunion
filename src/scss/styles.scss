@@ -38,7 +38,7 @@ body {
   background: #fff;
 }
 
-.feedback {
+.mixer {
   width: fit-content;
   padding: 0 20px;
   height: 100%;
@@ -56,7 +56,7 @@ body {
   opacity: 0;
 }
 
-.feedback,
+.mixer,
 .vis,
 .glvis,
 .effects,
@@ -64,11 +64,7 @@ body {
   visibility: hidden;
 }
 
-.feedback.visible,
-.vis.visible,
-.glvis.visible,
-.effects.visible,
-.editor.visible {
+.visible {
   visibility: visible;
 }
 
@@ -145,5 +141,5 @@ body {
 }
 
 #spec1 {
-  margin-top: 5px;
+  margin: 10px 0;
 }

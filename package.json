@@ -1,7 +1,7 @@
 {
-  "name": "uni0n",
+  "name": "tuni0n",
   "version": "1.0.1",
-  "description": "uni0n",
+  "description": "tuni0n",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

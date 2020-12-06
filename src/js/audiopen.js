@@ -1,11 +1,11 @@
 /*----------------------------------//
       _ __/`\/
     /'( _ (^'
-    /'| `>\ uni0n
+    /'| `>\ tuni0n
 /*----------------------------------*/
 
 //import { kMath } from "./kmath";
-import { H } from "./harmonic";
+import { Harmonic } from "./harmonic";
 import { AnalyserView } from "./analyser";
 import { Delay } from "./delay";
 
@@ -16,39 +16,27 @@ import jsWorkerUrl from "file-loader!ace-builds/src-noconflict/worker-javascript
 import NexusUI from "nexusui";
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+const H = new Harmonic();
 
 const defaultRack = `function process(buffer) {  
-  for (var t = 0; t < buffer.length; ++t) {
-    
-    vco1.step = H.lpf(vco1._x.value, vco1.step);
-    vco1.N = H.lpf(vco1._y.value, vco1.N);
-    vco1.theta += vco1.step;
+  for (var t = 0; t < buffer.length; ++t) {    
+    audiopen.processTheta();
 
-    vco2.step = H.lpf(vco2._x.value, vco2.step);
-    vco2.N = H.lpf(vco2._y.value, vco2.N);
-    vco2.theta += vco2.step;
-
-    vco3.step = H.lpf(vco3._x.value, vco3.step);
-    vco3.N = H.lpf(vco3._y.value, vco3.N);
-    vco3.theta += vco3.step;
-
-    vco4.step = H.lpf(vco4._x.value, vco4.step);
-    vco4.N = H.lpf(vco4._y.value, vco4.N);
-    vco4.theta += vco4.step;
-    
     vco1.out = H.sqr12(vco1.theta, vco1.N + vco1.feedback);
     vco2.out = H.saw12(vco2.theta, vco2.N + vco2.feedback);
     vco3.out = H.revsaw12(vco3.theta, vco3.N + vco3.feedback);
     vco4.out = H.tri12(vco4.theta, vco4.N - vco4.feedback);
     
-    out = 0.25 * (vco1.out + vco2.out + vco3.out + vco4.out);
-    
     audiopen.processFeedbackMatrix();
-    audiopen.processDrift();
+    audiopen.processVcoGain();
+
+    out = 0.25 * (vco1.gain * vco1.out + vco2.gain * vco2.out + vco3.gain * vco3.out + vco4.gain * vco4.out);
     
     const delayOut = delay.gain(d0gain.value).feedback(d0feedback.value).time(d0time.value).run(out);
 
-    buffer[t] = 0.5 * (out + delayOut);    
+    buffer[t] = 0.5 * (out + delayOut);
+
+    audiopen.processDrift();
   }
 }`;
 
@@ -60,7 +48,7 @@ window.onload = () => {
 
   self.audiopen = audiopen;
   self.out = 0;
-  self.H = audiopen.H;
+  self.H = H;
 
   self.delay = audiopen.delay;
 
@@ -73,10 +61,11 @@ window.onload = () => {
     theta: 0,
     N: 0,
     out: 0,
-    vco1: 0,
-    vco2: 0,
-    vco3: 0,
-    vco4: 0,
+    gain: 1,
+    vco1: 0,    
+    vco2: 0,    
+    vco3: 0,    
+    vco4: 0,    
     feedback: 0,
   };
 
@@ -101,9 +90,8 @@ class AudioPen {
     this.glvis = document.getElementsByClassName("glvis")[0];
     this.editor = document.getElementsByClassName("editor")[0];
     this.effects = document.getElementsByClassName("effects")[0];
-    this.feedback = document.getElementsByClassName("feedback")[0];
+    this.mixer = document.getElementsByClassName("mixer")[0];
 
-    this.H = new H();
     this.audioCtx = audioCtx;
 
     this.initDelay();
@@ -114,7 +102,7 @@ class AudioPen {
 
     this.view1crt = document.getElementById("view1crt");
     this.view1crt.width = 800;
-    this.view1crt.height = 400;
+    this.view1crt.height = 280;
     this.analyserView = new AnalyserView(this.view1crt);
     this.apiFunctionNames = ["process"];
     this.isPlaying = false;
@@ -192,17 +180,15 @@ class AudioPen {
    * @memberof AudioPen
    */
   initToggles() {
-    let self = this;
-
-    this.initPlayToggle(self);
-    this.initEditorToggle(self);
-    this.initEffectsToggle(self);
-    this.initFeedbackToggle(self);
-    this.initVisToggle(self);
-    this.initGlvisToggle(self);
+    this.initPlayToggle();
+    this.initEditorToggle();
+    this.initEffectsToggle();
+    this.initMixerToggle();
+    this.initVisToggle();
   }
 
-  initVisToggle(self) {
+  initVisToggle() {
+    let self = this;
     this.visToggle = new NexusUI.Toggle("#toggle-vis", {
       size: [40, 20],
       state: false,
@@ -217,22 +203,8 @@ class AudioPen {
     });
   }
 
-  initGlvisToggle(self) {
-    this.glvisToggle = new NexusUI.Toggle("#toggle-glvis", {
-      size: [40, 20],
-      state: false,
-    });
-
-    this.glvisToggle.on("change", (v) => {
-      if (v) {
-        self.glvis.className = "glvis visible";
-      } else {
-        self.glvis.className = "glvis";
-      }
-    });
-  }
-
-  initEffectsToggle(self) {
+  initEffectsToggle() {
+    let self = this;
     this.effectsToggle = new NexusUI.Toggle("#toggle-effects", {
       size: [40, 20],
       state: false,
@@ -247,22 +219,24 @@ class AudioPen {
     });
   }
 
-  initFeedbackToggle(self) {
-    this.feedbackToggle = new NexusUI.Toggle("#toggle-feedback", {
+  initMixerToggle() {
+    let self = this;
+    this.mixerToggle = new NexusUI.Toggle("#toggle-mixer", {
       size: [40, 20],
       state: false,
     });
 
-    this.feedbackToggle.on("change", (v) => {
+    this.mixerToggle.on("change", (v) => {
       if (v) {
-        self.feedback.className = "feedback visible";
+        self.mixer.className = "mixer visible";
       } else {
-        self.feedback.className = "feedback";
+        self.mixer.className = "mixer";
       }
     });
   }
 
-  initEditorToggle(self) {
+  initEditorToggle() {
+    let self = this;
     this.editorToggle = new NexusUI.Toggle("#toggle-editor", {
       size: [40, 20],
       state: false,
@@ -277,7 +251,8 @@ class AudioPen {
     });
   }
 
-  initPlayToggle(self) {
+  initPlayToggle() {
+    let self = this;
     this.playToggle = new NexusUI.TextButton("toggle-play", {
       text: "▶",
       alternateText: "⏹",
@@ -415,8 +390,8 @@ class AudioPen {
    */
   initFeedback() {
     this.vco1mat = new NexusUI.Multislider("#vco1mat", {
-      size: [128, 128],
-      numberOfSliders: 4,
+      size: [256, 256],
+      numberOfSliders: 6,
       min: 0,
       max: 1,
       step: 0.0001,
@@ -427,8 +402,8 @@ class AudioPen {
     });
 
     this.vco2mat = new NexusUI.Multislider("#vco2mat", {
-      size: [128, 128],
-      numberOfSliders: 4,
+      size: [256, 256],
+      numberOfSliders: 6,
       min: 0,
       max: 1,
       step: 0.0001,
@@ -439,8 +414,8 @@ class AudioPen {
     });
 
     this.vco3mat = new NexusUI.Multislider("#vco3mat", {
-      size: [128, 128],
-      numberOfSliders: 4,
+      size: [256, 256],
+      numberOfSliders: 6,
       min: 0,
       max: 1,
       step: 0.0001,
@@ -451,8 +426,8 @@ class AudioPen {
     });
 
     this.vco4mat = new NexusUI.Multislider("#vco4mat", {
-      size: [128, 128],
-      numberOfSliders: 4,
+      size: [256, 256],
+      numberOfSliders: 6,
       min: 0,
       max: 1,
       step: 0.0001,
@@ -470,12 +445,51 @@ class AudioPen {
    * @memberof AudioPen
    */
   processDrift() {
-    this.vco1.theta *= 1.00000002;
-    this.vco2.theta *= 0.99999998;
-    this.vco3.theta *= 1.00000003;
-    this.vco4.theta *= 0.99999999;
+    this.vco1.theta *= 1.0000000212335;
+    this.vco2.theta *= 0.9999999832434;
+    this.vco3.theta *= 1.0000000322735;
+    this.vco4.theta *= 0.9999999990125;
   }
 
+
+  /**
+   * processVcoGain
+   *
+   * @memberof AudioPen
+   */
+  processVcoGain() {
+    let self = this;
+
+    this.vco1.gain = H.lpf(self.vco1.gain, self.vco1mat.values[5]);
+    this.vco2.gain = H.lpf(self.vco2.gain, self.vco2mat.values[5]);
+    this.vco3.gain = H.lpf(self.vco3.gain, self.vco3mat.values[5]);
+    this.vco4.gain = H.lpf(self.vco4.gain, self.vco4mat.values[5]);
+  }
+
+
+  /**
+   * processTheta
+   * 
+   * @memberof AudioPen
+   */
+  processTheta() {
+    this.vco1.step = H.lpf(this.vco1._x.value, this.vco1.step);
+    this.vco1.N = H.lpf(this.vco1._y.value, this.vco1.N);
+    this.vco1.theta += this.vco1.step;
+
+    this.vco2.step = H.lpf(this.vco2._x.value, this.vco2.step);
+    this.vco2.N = H.lpf(this.vco2._y.value, this.vco2.N);
+    this.vco2.theta += this.vco2.step;
+
+    this.vco3.step = H.lpf(this.vco3._x.value, this.vco3.step);
+    this.vco3.N = H.lpf(this.vco3._y.value, this.vco3.N);
+    this.vco3.theta += this.vco3.step;
+
+    this.vco4.step = H.lpf(this.vco4._x.value, this.vco4.step);
+    this.vco4.N = H.lpf(this.vco4._y.value, this.vco4.N);
+    this.vco4.theta += this.vco4.step;    
+  }
+  
 
   /**
    * processFeedbackMatrix
@@ -485,38 +499,39 @@ class AudioPen {
   processFeedbackMatrix() {
     let self = this;
 
-    this.vco1.vco1 = 0.5 * (self.vco1mat.values[0] * this.vco1.out);
-    this.vco1.vco2 = 0.5 * (self.vco1mat.values[1] * this.vco2.out);
-    this.vco1.vco3 = 0.5 * (self.vco1mat.values[2] * this.vco3.out);
-    this.vco1.vco4 = 0.5 * (self.vco1mat.values[3] * this.vco4.out);
+    this.vco1.vco1 = self.vco1mat.values[0] * this.vco1.out;    
+    this.vco1.vco2 = self.vco1mat.values[1] * this.vco2.out;   
+    this.vco1.vco3 = self.vco1mat.values[2] * this.vco3.out; 
+    this.vco1.vco4 = self.vco1mat.values[3] * this.vco4.out;    
 
     this.vco1.feedback =
-      this.vco1.vco1 + this.vco1.vco2 + this.vco1.vco3 + this.vco1.vco4;
+      0.25 * (this.vco1.vco1 + this.vco1.vco2 + this.vco1.vco3 + this.vco1.vco4);
 
-    this.vco2.vco1 = 0.5 * (self.vco2mat.values[0] * this.vco1.out);
-    this.vco2.vco2 = 0.5 * (self.vco2mat.values[1] * this.vco2.out);
-    this.vco2.vco3 = 0.5 * (self.vco2mat.values[2] * this.vco3.out);
-    this.vco2.vco4 = 0.5 * (self.vco2mat.values[3] * this.vco4.out);
+    this.vco2.vco1 = self.vco2mat.values[0] * this.vco1.out;
+    this.vco2.vco2 = self.vco2mat.values[1] * this.vco2.out;
+    this.vco2.vco3 = self.vco2mat.values[2] * this.vco3.out;
+    this.vco2.vco4 = self.vco2mat.values[3] * this.vco4.out;
 
     this.vco2.feedback =
-      this.vco2.vco2 + this.vco2.vco1 + this.vco2.vco3 + this.vco2.vco4;
+      -0.25 * (this.vco2.vco2 + this.vco2.vco1 + this.vco2.vco3 + this.vco2.vco4);
 
-    this.vco3.vco1 = 0.5 * (self.vco3mat.values[0] * this.vco1.out);
-    this.vco3.vco2 = 0.5 * (self.vco3mat.values[1] * this.vco2.out);
-    this.vco3.vco3 = 0.5 * (self.vco3mat.values[2] * this.vco3.out);
-    this.vco3.vco4 = 0.5 * (self.vco3mat.values[3] * this.vco4.out);
+    this.vco3.vco1 = self.vco3mat.values[0] * this.vco1.out;
+    this.vco3.vco2 = self.vco3mat.values[1] * this.vco2.out;
+    this.vco3.vco3 = self.vco3mat.values[2] * this.vco3.out;
+    this.vco3.vco4 = self.vco3mat.values[3] * this.vco4.out;
 
     this.vco3.feedback =
-      this.vco3.vco1 + this.vco3.vco2 + this.vco3.vco3 + this.vco3.vco4;
+      0.25 * (this.vco3.vco1 + this.vco3.vco2 + this.vco3.vco3 + this.vco3.vco4);
 
-    this.vco4.vco1 = 0.5 * (self.vco4mat.values[0] * this.vco1.out);
-    this.vco4.vco2 = 0.5 * (self.vco4mat.values[1] * this.vco2.out);
-    this.vco4.vco3 = 0.5 * (self.vco4mat.values[2] * this.vco3.out);
-    this.vco4.vco4 = 0.5 * (self.vco4mat.values[3] * this.vco4.out);
+    this.vco4.vco1 = self.vco4mat.values[0] * this.vco1.out;
+    this.vco4.vco2 = self.vco4mat.values[1] * this.vco2.out;
+    this.vco4.vco3 = self.vco4mat.values[2] * this.vco3.out;
+    this.vco4.vco4 = self.vco4mat.values[3] * this.vco4.out;
 
     this.vco4.feedback =
-      this.vco4.vco2 + this.vco4.vco1 + this.vco4.vco3 + this.vco4.vco4;
+      -0.25 * (this.vco4.vco2 + this.vco4.vco1 + this.vco4.vco3 + this.vco4.vco4);
   }
+
 
   /**
    * initDelay

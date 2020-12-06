@@ -1,4 +1,4 @@
-export class H {
+export class Harmonic {
   constructor() {    
     this.TAU = 6.28318530717958647692528676655901; // @constant {Number} 2 pi
     this.GAMMA = 0.5772156649015328606065120900824; // @constant {Number} lim_(n->infty)(H_n-lnn)
@@ -194,26 +194,39 @@ export class H {
     let v = 0;
 
     /* TODO: this should return Complex Infinity */
-    //if (Math.abs(x) < Number.EPSILON || (Number.isInteger(x) && x < 0)) {
-    //  return Infinity;
-    //}
+    if (Math.abs(x) < Number.EPSILON || (Number.isInteger(x) && x < 0)) {
+      //console.log(`digamma12 -> Infinity`);
+      return Infinity;
+    }
     /* Special values at positive integers (table lookup) */
     if (Number.isInteger(x) && x < 12) {
-      return this.GAMMAINT[x - 1] - this.GAMMA;
+      const v = this.GAMMAINT[x - 1] - this.GAMMA;
+      //console.log(`digamma12 -> Special value at positive integer`);
+      //console.log(`digamma12 -> ${v}`);
+      return v;
     }
     /* Special values at positive half-integers (table lookup) */
     if (Number.isInteger(x - 1 / 2) && x < 25 / 2) {
-      return this.GAMMAHALFINT[x - 1 / 2] - this.GAMMA - this.TWOLN2;
+      const v = this.GAMMAHALFINT[x - 1 / 2] - this.GAMMA - this.TWOLN2;
+      //console.log(`digamma12 -> Special value at positive half-integer`);
+      //console.log(`digamma12 -> ${v}`);
+      return v;
     }
     /* Small values (0.000001) */
     if (Math.abs(x) <= 1e-6) {
-      /* Positive x */
-      if (x > 0) {
-        return this.GAMMA - 1 / x + this.ZETA2;
+      /* Positive x*/
+      if (x > 0) {              
+        const v = this.GAMMA - 1 / x + this.ZETA2;
+        x = x.toFixed(6);
+        console.log(`digamma12(${x}) => eulergamma - 1/${x} + zeta(2) => ${v} [recursion]`);
+        return v;
       }
       /* Negative x */
       if (x < 0) {
-        return this.digamma12(1 - x) + Math.PI / Math.tan(-Math.PI * x);
+        const v = this.digamma12(1 - x) + Math.PI / Math.tan(-Math.PI * x);
+        x = x.toFixed(6);
+        console.log(`digamma12(${x}) => digamma12(1 - ${x}) + pi/tan(-pi * ${x}) => ${v} [reflection]`);
+        return v;
       }
     }
 
@@ -276,15 +289,12 @@ export class H {
    * @return {Number}
    */
   sqr12(x, N, P) {
-    if (!P) P = 12;
+    if (!P) P = 32;
     x *= this.OMEGA;
-    const c = Math.cos(x);
-    const b = 12 * N * c;
-    const d0 = this.digamma12(3/4 - b, P);
-    const d1 = this.digamma12(1/4 - b, P);
-    const d = (d0 - d1) / Math.PI;
-    const v = Math.cos(this.TAU * b) * d - 1;
-    return v/2;
+    const b = 12 * N * Math.cos(x);
+    const d = this.digamma12(0.75 - b, P) - this.digamma12(0.25 - b, P);
+    const v = Math.cos(this.TAU * b) * d/Math.PI - 1;
+    return 0.5 * v;
   }
 
 
