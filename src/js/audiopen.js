@@ -80,7 +80,6 @@ window.onload = () => {
   self.addEventListener("resize", () => audiopen.resizePositionQuad(), true);
 };
 
-
 /**
  * AudioPen
  *
@@ -125,7 +124,6 @@ class AudioPen {
     this.t = 0;
   }
 
-
   /**
    * start
    *
@@ -135,8 +133,14 @@ class AudioPen {
     const self = this;
 
     this.initEditor();
-    this.initToggles();
-    this.compileCode();    
+    this.initPlayToggle();
+    this.initEditorToggle();
+    this.initEffectsToggle();
+    this.initMixerToggle();
+    this.initVisToggle();
+    this.initPatch();
+    this.initPatchButtons();
+    this.compileCode();
 
     this.channelCount = 2;
 
@@ -166,7 +170,6 @@ class AudioPen {
     this.mainLoop();
   }
 
-
   /**
    * initEditor
    *
@@ -185,21 +188,6 @@ class AudioPen {
       self.codeLastChanged = Date.now();
     });
   }
-
-
-  /**
-   * initToggles
-   *
-   * @memberof AudioPen
-   */
-  initToggles() {
-    this.initPlayToggle();
-    this.initEditorToggle();
-    this.initEffectsToggle();
-    this.initMixerToggle();
-    this.initVisToggle();
-  }
-
 
   /**
    * initVisToggle
@@ -222,7 +210,6 @@ class AudioPen {
     });
   }
 
-
   /**
    * initEffectsToggle
    *
@@ -244,10 +231,9 @@ class AudioPen {
     });
   }
 
-
   /**
    * initMixerToggle
-   * 
+   *
    * @memberof AudioPen
    */
   initMixerToggle() {
@@ -265,7 +251,6 @@ class AudioPen {
       }
     });
   }
-
 
   /**
    * initEditorToggle
@@ -288,6 +273,33 @@ class AudioPen {
     });
   }
 
+  /**
+   * initPatchButtons
+   *
+   * @memberof AudioPen
+   */
+  initPatchButtons() {
+    let self = this;
+    let savePatch = new NexusUI.TextButton("#save-patch", {
+      text: "▼",
+      size: [32, 32],
+      state: false,
+    });
+
+    savePatch.on("click", () => {
+      self.savePatch();
+    });
+
+    let loadPatch = new NexusUI.TextButton("#load-patch", {
+      text: "▲",
+      size: [32, 32],
+      state: false,
+    });
+
+    loadPatch.on("click", () => {
+      self.loadPatch();
+    });
+  }
 
   /**
    * initPlayToggle
@@ -320,7 +332,6 @@ class AudioPen {
     }
   }
 
-
   /**
    * savePatch
    *
@@ -332,19 +343,18 @@ class AudioPen {
     if (this.patch) {
       const patchString = JSON.stringify(this.patch);
 
-      console.log('audiopen: Saving patch');
-      window.localStorage.setItem('patch', patchString);
-    }    
+      console.log("audiopen: Saving patch");
+      window.localStorage.setItem("patch", patchString);
+    }
   }
-  
 
   /**
    * loadPatch
    *
    * @memberof AudioPen
    */
-  loadPatch() {    
-    this.patch = JSON.parse(window.localStorage.getItem('patch'));
+  loadPatch() {
+    this.patch = JSON.parse(window.localStorage.getItem("patch"));
 
     this.vco1._x.value = this.patch.vco1.x;
     this.vco1._y.value = this.patch.vco1.y;
@@ -359,13 +369,12 @@ class AudioPen {
     this.vco4._y.value = this.patch.vco4.y;
   }
 
-
   /**
-   * updatePatch
+   * initPatch
    *
    * @memberof AudioPen
    */
-  updatePatch() {
+  initPatch() {
     this.patch = {
       vco1: {
         gain: self.vco1.gain,
@@ -390,6 +399,24 @@ class AudioPen {
     };
   }
 
+  /**
+   * updatePatch
+   *
+   * @memberof AudioPen
+   */
+  updatePatch() {
+    this.patch.vco1.x = this.vco1._x.value;
+    this.patch.vco1.y = this.vco1._y.value;
+
+    this.patch.vco2.x = this.vco2._x.value;
+    this.patch.vco2.y = this.vco2._y.value;
+
+    this.patch.vco3.x = this.vco3._x.value;
+    this.patch.vco3.y = this.vco3._y.value;
+
+    this.patch.vco4.x = this.vco4._x.value;
+    this.patch.vco4.y = this.vco4._y.value;
+  }
 
   /**
    * initVis
@@ -418,7 +445,6 @@ class AudioPen {
       size: [800, 280],
     });
   }
-
 
   /**
    * initFeedback
@@ -475,7 +501,6 @@ class AudioPen {
     });
   }
 
-
   /**
    * processDrift
    *
@@ -487,7 +512,6 @@ class AudioPen {
     this.vco3.theta *= 1.00000001322735;
     this.vco4.theta *= 0.99999998990125;
   }
-
 
   /**
    * processVcoGain
@@ -502,7 +526,6 @@ class AudioPen {
     this.vco3.gain = H.lpf(self.vco3mat.values[5], self.vco3.gain);
     this.vco4.gain = H.lpf(self.vco4mat.values[5], self.vco4.gain);
   }
-
 
   /**
    * processTheta
@@ -527,7 +550,6 @@ class AudioPen {
     this.vco3.theta += this.vco3.step;
     this.vco4.theta += this.vco4.step;
   }
-
 
   /**
    * processFeedbackMatrix
@@ -573,7 +595,6 @@ class AudioPen {
       -0.25 *
       (this.vco4.vco2 + this.vco4.vco1 + this.vco4.vco3 + this.vco4.vco4);
   }
-  
 
   /**
    * initDelay
