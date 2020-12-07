@@ -331,9 +331,11 @@ class AudioPen {
 
     if (this.patch) {
       const patchString = JSON.stringify(this.patch);
+      const patchBankString = JSON.stringify(this.patchBank);
 
       console.log("audiopen: Saving patch");
       window.localStorage.setItem("patch", patchString);
+      window.localStorage.setItem("patchBank", patchBankString);
     }
   }
 
@@ -344,8 +346,9 @@ class AudioPen {
    */
   loadPatch() {
     let self = this;
-    
+
     this.patch = JSON.parse(window.localStorage.getItem("patch"));
+    this.patchBank = JSON.parse(window.localStorage.getItem("patchBank"));
 
     this.vco1.x = this.patch.vco1.x;
     this.vco1.y = this.patch.vco1.y;
@@ -358,7 +361,7 @@ class AudioPen {
 
     this.vco4.x = this.patch.vco4.x;
     this.vco4.y = this.patch.vco4.y;
-  
+
     this.vco1mat.setAllSliders(self.patch.vco1.mat);
     this.vco2mat.setAllSliders(self.patch.vco2.mat);
     this.vco3mat.setAllSliders(self.patch.vco3.mat);
@@ -375,6 +378,9 @@ class AudioPen {
    * @memberof AudioPen
    */
   initPatch() {
+    const patchBank = JSON.parse(window.localStorage.getItem("patchBank"));
+    const patchNames = patchBank.map(patch => patch.name);
+
     this.patch = {
       name: `patch_${Date.now()}`,
       vco1: {
@@ -405,14 +411,19 @@ class AudioPen {
         delay: {
           gain: self.d0gain.value,
           feedback: self.d0feedback.value,
-          time: self.d0time.value
-        }
-      }
+          time: self.d0time.value,
+        },
+      },
     };
 
-    this.patchBank = [
-      this.patch
-    ];    
+    this.patchBank = [this.patch];
+
+    if (patchBank) {
+      this.patchBankSelect = new NexusUI.Select("#select-patch", {
+        size: [256, 28],
+        options: patchNames
+      });
+    }
   }
 
   /**
@@ -421,6 +432,8 @@ class AudioPen {
    * @memberof AudioPen
    */
   updatePatch() {
+    let self = this;
+
     this.patch.vco1.x = this.vco1._x.value;
     this.patch.vco1.y = this.vco1._y.value;
     this.patch.vco1.mat = this.vco1mat.values;
@@ -436,10 +449,12 @@ class AudioPen {
     this.patch.vco4.x = this.vco4._x.value;
     this.patch.vco4.y = this.vco4._y.value;
     this.patch.vco4.mat = this.vco4mat.values;
-    
+
     this.patch.effects.delay.gain = this.d0gain.value;
     this.patch.effects.delay.feedback = this.d0feedback.value;
     this.patch.effects.delay.time = this.d0time.value;
+
+    this.patchBank.push(self.patch);
   }
 
   /**
