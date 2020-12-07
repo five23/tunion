@@ -368,7 +368,7 @@ class AudioPen {
           time: self.d0time.value,
         },
       },
-      editor: self.aceEditor.getValue(0)
+      editor: self.aceEditor.getValue(0),
     });
 
     if (this.patch) {
@@ -410,9 +410,9 @@ class AudioPen {
         this.d0feedback.value = patch.effects.delay.feedback;
         this.d0time.value = patch.effects.delay.time;
 
-        this.aceEditor.setValue(patch.editor, -1);        
+        this.aceEditor.setValue(patch.editor, -1);
 
-        this.codeLastChanged = Date.now();
+        this.compileCode();
       }
     });
   }
@@ -456,7 +456,7 @@ class AudioPen {
           time: this.d0time.value,
         },
       },
-      editor: this.aceEditor.getValue(0)
+      editor: this.aceEditor.getValue(0),
     };
   }
 
@@ -476,7 +476,7 @@ class AudioPen {
           options: patchNames,
         });
       }
-    } else {      
+    } else {
       this.patchBank = [this.patch];
     }
   }
