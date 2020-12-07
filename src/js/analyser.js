@@ -1,167 +1,17 @@
 import { Matrix4x4 } from "./matrix4x4";
-import { CameraController, shader } from "./utils3d";
+import { shader } from "./utils3d";
+import { Camera } from "./camera";
+import { commonVertex } from "./shaders/commonVertex";
+import { frequencyFragment } from "./shaders/frequencyFragment";
+import { sonogramFragment } from "./shaders/sonogramFragment";
+import { sonogramVertex } from "./shaders/sonogramVertex";
+import { waveformFragment } from "./shaders/waveformFragment";
 
 window.shader = shader;
 
-// The "model" matrix is the "world" matrix in Standard Annotations and Semantics
-var model = new Matrix4x4();
-var view = new Matrix4x4();
-var projection = new Matrix4x4();
-
-var ANALYSISTYPE_FREQUENCY = 0;
-var ANALYSISTYPE_SONOGRAM = 1;
-var ANALYSISTYPE_3D_SONOGRAM = 2;
-var ANALYSISTYPE_WAVEFORM = 3;
-
-var common_vertex_shader = `
-attribute vec3 gPosition;
-attribute vec2 gTexCoord0;
-
-varying vec2 texCoord;
-
-void main()
-{
-  gl_Position = vec4(gPosition.x, gPosition.y, gPosition.z, 1.0);
-  texCoord = gTexCoord0;
-}`;
-
-var frequency_fragment_shader = `
-#ifdef GL_ES
-precision mediump float;
-#endif
-
-varying vec2 texCoord;
-uniform sampler2D frequencyData;
-uniform vec4 foregroundColor;
-uniform vec4 backgroundColor;
-uniform float yoffset;
-
-void main()
-{
-    vec4 sample = texture2D(frequencyData, vec2(texCoord.x, yoffset));
-    if (texCoord.y > sample.a) {
-        // if (texCoord.y > sample.a + 1 || texCoord.y < sample.a - 1) {
-        discard;
-    }
-    float x = texCoord.y / sample.a;
-    x = x * x * x;
-    gl_FragColor = mix(foregroundColor, backgroundColor, x);
-}
-`;
-
-var sonogram_fragment_shader = `
-#ifdef GL_ES
-precision mediump float;
-#endif
-
-varying vec2 texCoord;
-
-uniform sampler2D frequencyData;
-uniform vec4 foregroundColor;
-uniform vec4 backgroundColor;
-uniform float yoffset;
-
-void main()
-{
-    float x = pow(256.0, texCoord.x - 1.0);
-    float y = texCoord.y + yoffset;
-
-    vec4 sample = texture2D(frequencyData, vec2(x, y));
-    float k = sample.a;
-
-    // gl_FragColor = vec4(k, k, k, 1.0);
-    // Fade out the mesh close to the edges
-    float fade = pow(cos((1.0 - texCoord.y) * 0.5 * 3.1415926535), 0.5);
-    k *= fade;
-    vec4 color = k * vec4(0,0,0,1) + (1.0 - k) * backgroundColor;
-    gl_FragColor = color;
-}
-`;
-
-var sonogram_vertex_shader = `
-attribute vec3 gPosition;
-attribute vec2 gTexCoord0;
-uniform sampler2D vertexFrequencyData;
-uniform float vertexYOffset;
-uniform mat4 worldViewProjection;
-uniform float verticalScale;
-
-varying vec2 texCoord;
-
-void main()
-{
-    float x = pow(256.0, gTexCoord0.x - 1.0);
-    vec4 sample = texture2D(vertexFrequencyData, vec2(x, gTexCoord0.y + vertexYOffset));
-    vec4 newPosition = vec4(gPosition.x, gPosition.y + verticalScale * sample.a, gPosition.z, 1.0);
-    gl_Position = worldViewProjection * newPosition;
-    texCoord = gTexCoord0;
-}
-`;
-
-var waveform_fragment_shader = `
-#ifdef GL_ES
-precision mediump float;
-#endif
-
-varying vec2 texCoord;
-uniform sampler2D frequencyData;
-uniform vec4 foregroundColor;
-uniform vec4 backgroundColor;
-uniform float yoffset;
-
-void main()
-{
-    vec4 sample = texture2D(frequencyData, vec2(texCoord.x, yoffset));
-    if (texCoord.y > sample.a + 0.005 || texCoord.y < sample.a - 0.005) {
-        discard;
-    }
-    float x = (texCoord.y - sample.a) / 0.005;
-    x = x * x * x;
-    gl_FragColor = mix(foregroundColor, backgroundColor, x);
-}
-`;
-
-/**
- *
- *
- * @param {*} context
- * @param {*} fname
- * @return {*}
- */
-export function createGLErrorWrapper(context, fname) {
-  return function () {
-    var rv = context[fname].apply(context, arguments);
-    var err = context.getError();
-    if (err != 0) throw "GL error " + err + " in " + fname;
-    return rv;
-  };
-}
-
-/**
- *
- *
- * @param {*} context
- * @return {*}
- */
-export function create3DDebugContext(context) {
-  // Thanks to Ilmari Heikkinen for the idea on how to implement this so elegantly.
-  var wrap = {};
-  for (var i in context) {
-    try {
-      if (typeof context[i] == "function") {
-        wrap[i] = createGLErrorWrapper(context, i);
-      } else {
-        wrap[i] = context[i];
-      }
-    } catch (e) {
-      // console.log("create3DDebugContext: Error accessing " + i);
-    }
-  }
-  wrap.getError = function () {
-    return context.getError();
-  };
-  return wrap;
-}
+let model = new Matrix4x4();
+let view = new Matrix4x4();
+let projection = new Matrix4x4();
 
 /**
  * AnalyserView
@@ -169,10 +19,17 @@ export function create3DDebugContext(context) {
  * @param {*} canvasElementID
  */
 export function AnalyserView(canvas) {
+  const gl = canvas.getContext("webgl");
+
+  this.gl = gl;
+  this.has3DVisualizer = gl.getParameter(gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS) > 0;
   this.canvas = canvas;
-  this.analysisType = ANALYSISTYPE_FREQUENCY;
+  this.analysisType = 0;
   this.freqByteData = 0;
   this.texture = 0;
+  this.camera = new Camera(canvas);
+  this.camera.xRot = -45;
+  this.camera.yRot = 0;
 
   // Background color
   this.backgroundColor = [238 / 255, 238 / 255, 238 / 255, 1];
@@ -184,28 +41,12 @@ export function AnalyserView(canvas) {
 }
 
 /**
- *
- *
+ * initGL
  */
 AnalyserView.prototype.initGL = function () {
   var backgroundColor = this.backgroundColor;
 
-  var canvas = this.canvas;
-
-  var gl = canvas.getContext("webgl");
-  this.gl = gl;
-
-  this.has3DVisualizer = gl.getParameter(gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS) > 0;
-
-  if (!this.has3DVisualizer && this.analysisType == ANALYSISTYPE_3D_SONOGRAM) {
-    this.analysisType = ANALYSISTYPE_FREQUENCY;
-  }
-
-  var cameraController = new CameraController(canvas);
-  this.cameraController = cameraController;
-
-  cameraController.xRot = -45;
-  cameraController.yRot = 0;
+  let gl = this.gl;
 
   gl.clearColor(
     backgroundColor[0],
@@ -307,31 +148,24 @@ AnalyserView.prototype.initGL = function () {
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sonogram3DIBO);
   gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
 
-  this.frequencyShader = new shader.Shader(
-    gl,
-    common_vertex_shader,
-    frequency_fragment_shader
-  );
-  this.waveformShader = new shader.Shader(
-    gl,
-    common_vertex_shader,
-    waveform_fragment_shader
-  );
-  this.sonogramShader = new shader.Shader(
-    gl,
-    common_vertex_shader,
-    sonogram_fragment_shader
-  );
+  this.frequencyShader = new shader.Shader(gl, commonVertex, frequencyFragment);
+  this.waveformShader = new shader.Shader(gl, commonVertex, waveformFragment);
+  this.sonogramShader = new shader.Shader(gl, commonVertex, sonogramFragment);
 
   if (this.has3DVisualizer) {
     this.sonogram3DShader = new shader.Shader(
       gl,
-      sonogram_vertex_shader,
-      sonogram_fragment_shader
+      sonogramVertex,
+      sonogramFragment
     );
   }
 };
 
+/**
+ * initByteBuffer
+ *
+ * @param {*} analyser
+ */
 AnalyserView.prototype.initByteBuffer = function (analyser) {
   var freqByteData;
   var gl = this.gl;
@@ -342,8 +176,6 @@ AnalyserView.prototype.initByteBuffer = function (analyser) {
   ) {
     freqByteData = new Uint8Array(analyser.frequencyBinCount);
     this.freqByteData = freqByteData;
-
-    // (Re-)Allocate the texture object
     if (this.texture) {
       gl.deleteTexture(this.texture);
       this.texture = null;
@@ -356,7 +188,6 @@ AnalyserView.prototype.initByteBuffer = function (analyser) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    // TODO(kbr): WebGL needs to properly clear out the texture when null is specified
     var tmp = new Uint8Array(freqByteData.length * 256);
     gl.texImage2D(
       gl.TEXTURE_2D,
@@ -379,48 +210,9 @@ AnalyserView.prototype.initByteBuffer = function (analyser) {
  * @return {*}
  */
 AnalyserView.prototype.setAnalysisType = function (type) {
-  // Check for read textures in vertex shaders.
-  if (!this.has3DVisualizer && type == ANALYSISTYPE_3D_SONOGRAM) return;
+  if (!this.has3DVisualizer && type == 2) return;
 
   this.analysisType = type;
-};
-
-/**
- * analysisType
- *
- * @return {*}
- */
-AnalyserView.prototype.analysisType = function () {
-  return this.analysisType;
-};
-
-/**
- * doFrequencyAnalysis
- *
- * @param {*} event
- */
-AnalyserView.prototype.doFrequencyAnalysis = function (analyser) {
-  var freqByteData = this.freqByteData;
-
-  switch (this.analysisType) {
-    case ANALYSISTYPE_FREQUENCY:
-      analyser.smoothingTimeConstant = 0.75;
-      analyser.getByteFrequencyData(freqByteData);
-      break;
-
-    case ANALYSISTYPE_SONOGRAM:
-    case ANALYSISTYPE_3D_SONOGRAM:
-      analyser.smoothingTimeConstant = 0.1;
-      analyser.getByteFrequencyData(freqByteData);
-      break;
-
-    case ANALYSISTYPE_WAVEFORM:
-      analyser.smoothingTimeConstant = 0.1;
-      analyser.getByteTimeDomainData(freqByteData);
-      break;
-  }
-
-  this.drawGL();
 };
 
 /**
@@ -445,10 +237,7 @@ AnalyserView.prototype.drawGL = function () {
 
   gl.bindTexture(gl.TEXTURE_2D, texture);
   gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-  if (
-    this.analysisType != ANALYSISTYPE_SONOGRAM &&
-    this.analysisType != ANALYSISTYPE_3D_SONOGRAM
-  ) {
+  if (this.analysisType != 1 && this.analysisType != 2) {
     this.yoffset = 0;
   }
 
@@ -464,17 +253,10 @@ AnalyserView.prototype.drawGL = function () {
     freqByteData
   );
 
-  if (
-    this.analysisType == ANALYSISTYPE_SONOGRAM ||
-    this.analysisType == ANALYSISTYPE_3D_SONOGRAM
-  ) {
+  if (this.analysisType == 1 || this.analysisType == 2) {
     this.yoffset = (this.yoffset + 1) % 256;
   }
   var yoffset = this.yoffset;
-
-  // Point the frequency data texture at texture unit 0 (the default),
-  // which is what we're using since we haven't called activeTexture
-  // in our program
 
   var vertexLoc;
   var texCoordLoc;
@@ -486,13 +268,10 @@ AnalyserView.prototype.drawGL = function () {
   var currentShader;
 
   switch (this.analysisType) {
-    case ANALYSISTYPE_FREQUENCY:
-    case ANALYSISTYPE_WAVEFORM:
+    case 0:
+    case 3:
       gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-      currentShader =
-        this.analysisType == ANALYSISTYPE_FREQUENCY
-          ? frequencyShader
-          : waveformShader;
+      currentShader = this.analysisType == 0 ? frequencyShader : waveformShader;
       currentShader.bind();
       vertexLoc = currentShader.gPositionLoc;
       texCoordLoc = currentShader.gTexCoord0Loc;
@@ -503,7 +282,7 @@ AnalyserView.prototype.drawGL = function () {
       texCoordOffset = vboTexCoordOffset;
       break;
 
-    case ANALYSISTYPE_SONOGRAM:
+    case 1:
       gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
       sonogramShader.bind();
       vertexLoc = sonogramShader.gPositionLoc;
@@ -515,7 +294,7 @@ AnalyserView.prototype.drawGL = function () {
       texCoordOffset = vboTexCoordOffset;
       break;
 
-    case ANALYSISTYPE_3D_SONOGRAM:
+    case 2:
       gl.bindBuffer(gl.ARRAY_BUFFER, sonogram3DVBO);
       sonogram3DShader.bind();
       vertexLoc = sonogram3DShader.gPositionLoc;
@@ -531,18 +310,15 @@ AnalyserView.prototype.drawGL = function () {
       gl.uniform1f(sonogram3DShader.vertexYOffsetLoc, discretizedYOffset);
       gl.uniform1f(sonogram3DShader.verticalScaleLoc, 12 / 4.0);
 
-      // Set up the model, view and projection matrices
       projection.loadIdentity();
       projection.perspective(55 /*35*/, canvas.width / canvas.height, 1, 100);
       view.loadIdentity();
       view.translate(0, 0, -10.0 /*-13.0*/);
 
-      // Add in camera controller's rotation
       model.loadIdentity();
-      model.rotate(this.cameraController.xRot, 1, 0, 0);
-      model.rotate(this.cameraController.yRot, 0, 1, 0);
+      model.rotate(this.camera.xRot, 1, 0, 0);
+      model.rotate(this.camera.yRot, 0, 1, 0);
 
-      // Compute necessary matrices
       var mvp = new Matrix4x4();
       mvp.multiply(model);
       mvp.multiply(view);
@@ -566,28 +342,22 @@ AnalyserView.prototype.drawGL = function () {
     gl.uniform4fv(backgroundColorLoc, this.backgroundColor);
   }
 
-  // Set up the vertex attribute arrays
   gl.enableVertexAttribArray(vertexLoc);
   gl.vertexAttribPointer(vertexLoc, 3, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(texCoordLoc);
   gl.vertexAttribPointer(texCoordLoc, 2, gl.FLOAT, gl.FALSE, 0, texCoordOffset);
-
-  // Clear the render area
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-  // Actually draw
   if (
-    this.analysisType == ANALYSISTYPE_FREQUENCY ||
-    this.analysisType == ANALYSISTYPE_WAVEFORM ||
-    this.analysisType == ANALYSISTYPE_SONOGRAM
+    this.analysisType == 0 ||
+    this.analysisType == 3 ||
+    this.analysisType == 1
   ) {
     gl.drawArrays(gl.TRIANGLES, 0, 6);
-  } else if (this.analysisType == ANALYSISTYPE_3D_SONOGRAM) {
-    // Note: this expects the element array buffer to still be bound
+  } else if (this.analysisType == 2) {
     gl.drawElements(gl.TRIANGLES, sonogram3DNumIndices, gl.UNSIGNED_SHORT, 0);
   }
 
-  // Disable the attribute arrays for cleanliness
   gl.disableVertexAttribArray(vertexLoc);
   gl.disableVertexAttribArray(texCoordLoc);
 };

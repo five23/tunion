@@ -24,7 +24,7 @@ export class Harmonic {
     ];
 
     // @constant {Array} Numerators of harmonic numbers H(n) = Sum_{i=1..n} 1/i.
-    this.HN0 = [
+    /*this.HN0 = [
       1,
       3,
       11,
@@ -54,10 +54,10 @@ export class Harmonic {
       312536252003,
       315404588903,
       9227046511387,
-    ];
+    ];*/
 
     // @constant {Array} Denominators of harmonic numbers H(n) = Sum_{i=1..n} 1/i
-    this.HN1 = [
+    /*this.HN1 = [
       1,
       2,
       6,
@@ -87,7 +87,7 @@ export class Harmonic {
       80313433200,
       80313433200,
       2329089562800,
-    ];
+    ];*/
 
     this.GAMMAINT = [
       0,
@@ -104,7 +104,7 @@ export class Harmonic {
       83711 / 27720,
     ];
 
-    this.GAMMAINT_TEST_VALUES = [
+    /*this.GAMMAINT_TEST_VALUES = [
       -0.5772156649015329,
       0.42278433509846713,
       0.9227843350984671,
@@ -117,7 +117,7 @@ export class Harmonic {
       2.2517525890667214,
       2.351752589066721,
       2.4426616799758123,
-    ];
+    ];*/
 
     this.GAMMAHALFINT = [
       0,
@@ -134,7 +134,7 @@ export class Harmonic {
       1488711776 / 334639305,
     ];
 
-    this.GAMMAHALFINT_TEST_VALUES = [
+    /*this.GAMMAHALFINT_TEST_VALUES = [
       -1.9635100260214235,
       0.03648997397857652,
       0.7031566406452432,
@@ -147,7 +147,7 @@ export class Harmonic {
       2.1977378764029494,
       2.303001034297686,
       2.398239129535781,
-    ];
+    ];*/
   }
 
   /**
@@ -156,7 +156,7 @@ export class Harmonic {
    * @param {Number} x
    * @return {Number}
    */
-  digamma(b) {
+  /*digamma(b) {
     let c = 0;
     if (0 >= b && b === Math.round(b)) {
       return Infinity;
@@ -182,7 +182,7 @@ export class Harmonic {
           (0.0039682539682539 - (0.004166666666666 - 1 / (132 * b)) / b) / b) /
           b) /
         b);
-  }
+  }*/
 
   /**
    * Precision Digamma function
@@ -262,9 +262,9 @@ export class Harmonic {
    * @param {Number} x
    * @return {Number}
    */
-  H(x) {
+  /*H(x) {
     return this.digamma(++x) + this.GAMMA;
-  }
+  }*/
 
   /**
    * Precision Harmonic Number

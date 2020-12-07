@@ -1,15 +1,5 @@
 import Vec2 from "vec2";
-
-class LPF {
-  constructor(z) {
-    if (!z) this.z = 0.998;
-    else this.z = z;
-    this.out = 0;
-  }
-  run(n, x) {
-    return x + (n - x) * this.z;
-  }
-}
+import { LPF } from "./lpf";
 
 let lpf = new LPF(0.998);
 
@@ -18,7 +8,7 @@ let lpf = new LPF(0.998);
  *
  * @export
  * @param {*} size
- * @return {*} 
+ * @return {*}
  */
 export function Delay(size) {
   if (!(this instanceof Delay)) return new Delay(size);
@@ -35,7 +25,7 @@ export function Delay(size) {
  * Set delay output gain
  *
  * @param {*} n
- * @return {*} 
+ * @return {*}
  */
 Delay.prototype.gain = function (n) {
   this._gain.x = n;
@@ -46,7 +36,7 @@ Delay.prototype.gain = function (n) {
  * Set delay feedback (0...0.9999)
  *
  * @param {*} n
- * @return {*} 
+ * @return {*}
  */
 Delay.prototype.feedback = function (n) {
   this._feed.x = n;
@@ -57,7 +47,7 @@ Delay.prototype.feedback = function (n) {
  * Set delay time (0...32000)
  *
  * @param {*} n
- * @return {*} 
+ * @return {*}
  */
 Delay.prototype.time = function (n) {
   this._time.x = n;
@@ -68,7 +58,7 @@ Delay.prototype.time = function (n) {
  * Process
  *
  * @param {*} inp
- * @return {*} 
+ * @return {*}
  */
 Delay.prototype.run = function (inp) {
   this._gain.y = lpf.run(this._gain.x, this._gain.y);

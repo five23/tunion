@@ -8,7 +8,7 @@
 import { Harmonic } from "./harmonic";
 import { AnalyserView } from "./analyser";
 import { Delay } from "./delay";
-import { initMidi } from "./midi";
+//import { initMidi } from "./midi";
 
 import ace from "ace-builds/src-noconflict/ace";
 import "ace-builds/src-noconflict/mode-javascript";
@@ -100,7 +100,7 @@ class AudioPen {
     this.initPositionQuad();
     this.initVis();
 
-    initMidi();
+    //initMidi();
 
     this.apiFunctionNames = ["process"];
     this.isPlaying = false;
@@ -121,14 +121,11 @@ class AudioPen {
   start() {
     const self = this;
 
-    this.initEditor();
-    this.initPlayToggle();
-    this.initEditorToggle();
-    this.initEffectsToggle();
-    this.initMixerToggle();
-    this.initVisToggle();
-    this.initPatchBank();
-    this.initPatchButtons();
+    this.initEditor(self);
+    this.initToggles(self);
+    this.initPatchBankButtons(self);
+
+    this.initPatchBank();    
     this.compileCode();
 
     this.channelCount = 2;
@@ -160,31 +157,11 @@ class AudioPen {
   }
 
   /**
-   * initEditor
+   * initToggles
    *
    * @memberof AudioPen
    */
-  initEditor() {
-    const self = this;
-
-    ace.config.setModuleUrl("ace/mode/javascript_worker", jsWorkerUrl);
-
-    this.aceEditor = ace.edit("ace-editor");
-    this.aceEditor.setShowPrintMargin(false);
-    this.aceEditor.getSession().setMode("ace/mode/javascript");
-    this.aceEditor.setValue(defaultRack, -1);
-    this.aceEditor.on("change", () => {
-      self.codeLastChanged = Date.now();
-    });
-  }
-
-  /**
-   * initVisToggle
-   *
-   * @memberof AudioPen
-   */
-  initVisToggle() {
-    let self = this;
+  initToggles(self) {
     this.visToggle = new NexusUI.Toggle("#toggle-vis", {
       size: [40, 20],
       state: false,
@@ -197,15 +174,7 @@ class AudioPen {
         self.vis.className = "vis";
       }
     });
-  }
 
-  /**
-   * initEffectsToggle
-   *
-   * @memberof AudioPen
-   */
-  initEffectsToggle() {
-    let self = this;
     this.effectsToggle = new NexusUI.Toggle("#toggle-effects", {
       size: [40, 20],
       state: false,
@@ -218,15 +187,7 @@ class AudioPen {
         self.effects.className = "effects";
       }
     });
-  }
 
-  /**
-   * initMixerToggle
-   *
-   * @memberof AudioPen
-   */
-  initMixerToggle() {
-    let self = this;
     this.mixerToggle = new NexusUI.Toggle("#toggle-mixer", {
       size: [40, 20],
       state: false,
@@ -239,15 +200,7 @@ class AudioPen {
         self.mixer.className = "mixer";
       }
     });
-  }
 
-  /**
-   * initEditorToggle
-   *
-   * @memberof AudioPen
-   */
-  initEditorToggle() {
-    let self = this;
     this.editorToggle = new NexusUI.Toggle("#toggle-editor", {
       size: [40, 20],
       state: false,
@@ -260,43 +213,7 @@ class AudioPen {
         self.editor.className = "editor";
       }
     });
-  }
 
-  /**
-   * initPatchButtons
-   *
-   * @memberof AudioPen
-   */
-  initPatchButtons() {
-    let self = this;
-    const savePatch = new NexusUI.TextButton("#save-patch", {
-      text: "▼",
-      size: [32, 32],
-      state: false,
-    });
-
-    savePatch.on("click", () => {
-      self.savePatch();
-    });
-
-    let loadPatch = new NexusUI.TextButton("#load-patch", {
-      text: "▲",
-      size: [32, 32],
-      state: false,
-    });
-
-    loadPatch.on("click", () => {
-      self.loadPatch(self.patchBankSelect.value);
-    });
-  }
-
-  /**
-   * initPlayToggle
-   *
-   * @memberof AudioPen
-   */
-  initPlayToggle() {
-    let self = this;
     this.playToggle = new NexusUI.TextButton("toggle-play", {
       text: "▶",
       alternateText: "⏹",
@@ -320,6 +237,32 @@ class AudioPen {
       self.audioCtx.suspend();
     }
   }
+
+  /**
+   * initEditor
+   *
+   * @memberof AudioPen
+   */
+  initEditor(self) {
+    ace.config.setModuleUrl("ace/mode/javascript_worker", jsWorkerUrl);
+
+    this.aceEditor = ace.edit("ace-editor");
+    this.aceEditor.setShowPrintMargin(false);
+    this.aceEditor.getSession().setMode("ace/mode/javascript");
+    this.aceEditor.setValue(defaultRack, -1);
+    this.aceEditor.on("change", () => {
+      self.codeLastChanged = Date.now();
+    });
+  }
+
+  /**
+   * initPatchButtons
+   *
+   * @memberof AudioPen
+   */
+  initPatchButtons() {
+  }
+
 
   /**
    * savePatch
@@ -460,6 +403,39 @@ class AudioPen {
     };
   }
 
+  /**
+   * initPatchBankButtons
+   *
+   * @param {*} self
+   * @memberof AudioPen
+   */
+  initPatchBankButtons(self) {
+    const savePatch = new NexusUI.TextButton("#save-patch", {
+      text: "▼",
+      size: [32, 32],
+      state: false,
+    });
+
+    savePatch.on("click", () => {
+      self.savePatch();
+    });
+
+    let loadPatch = new NexusUI.TextButton("#load-patch", {
+      text: "▲",
+      size: [32, 32],
+      state: false,
+    });
+
+    loadPatch.on("click", () => {
+      self.loadPatch(self.patchBankSelect.value);
+    });
+  }
+
+  /**
+   * initPatchBank
+   *
+   * @memberof AudioPen
+   */
   initPatchBank() {
     this.patch = this.initNewPatch();
 
@@ -828,10 +804,35 @@ class AudioPen {
    */
   executeCode({ outputBuffer }) {
     const self = this;
+
     let buffer = outputBuffer.getChannelData(0);
+
     // eslint-disable-next-line no-unused-vars
     buffer = this.compiledCode.process(buffer);
-    this.analyserView.doFrequencyAnalysis(self.analyser);
+
+    //this.analyserView.doFrequencyAnalysis(self.analyser);
+
+    var freqByteData = this.analyserView.freqByteData;
+
+    switch (this.analyserView.analysisType) {
+      case 0:
+        self.analyser.smoothingTimeConstant = 0.75;
+        self.analyser.getByteFrequencyData(freqByteData);
+        break;
+
+      case 1:
+      case 2:
+        self.analyser.smoothingTimeConstant = 0.1;
+        self.analyser.getByteFrequencyData(freqByteData);
+        break;
+
+      case 3:
+        self.analyser.smoothingTimeConstant = 0.1;
+        self.analyser.getByteTimeDomainData(freqByteData);
+        break;
+    }
+
+    this.analyserView.drawGL();
   }
 
   /**
