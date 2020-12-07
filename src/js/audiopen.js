@@ -127,7 +127,7 @@ class AudioPen {
     this.initEffectsToggle();
     this.initMixerToggle();
     this.initVisToggle();
-    this.initPatch();
+    this.initPatchBank();
     this.initPatchButtons();
     this.compileCode();
 
@@ -286,7 +286,7 @@ class AudioPen {
     });
 
     loadPatch.on("click", () => {
-      self.loadPatch();
+      self.loadPatch(self.patchBankSelect.value);
     });
   }
 
@@ -327,62 +327,16 @@ class AudioPen {
    * @memberof AudioPen
    */
   savePatch() {
-    this.updatePatch();
-
-    if (this.patch) {
-      const patchString = JSON.stringify(this.patch);
-      const patchBankString = JSON.stringify(this.patchBank);
-
-      console.log("audiopen: Saving patch");
-      window.localStorage.setItem("patch", patchString);
-      window.localStorage.setItem("patchBank", patchBankString);
-    }
-  }
-
-  /**
-   * loadPatch
-   *
-   * @memberof AudioPen
-   */
-  loadPatch() {
     let self = this;
 
-    this.patch = JSON.parse(window.localStorage.getItem("patch"));
-    this.patchBank = JSON.parse(window.localStorage.getItem("patchBank"));
+    let patchName = document.getElementById("patch-name").value;
 
-    this.vco1.x = this.patch.vco1.x;
-    this.vco1.y = this.patch.vco1.y;
+    if (!patchName) {
+      patchName = `patch_${Date.now()}`;
+    }
 
-    this.vco2.x = this.patch.vco2.x;
-    this.vco2.y = this.patch.vco2.y;
-
-    this.vco3.x = this.patch.vco3.x;
-    this.vco3.y = this.patch.vco3.y;
-
-    this.vco4.x = this.patch.vco4.x;
-    this.vco4.y = this.patch.vco4.y;
-
-    this.vco1mat.setAllSliders(self.patch.vco1.mat);
-    this.vco2mat.setAllSliders(self.patch.vco2.mat);
-    this.vco3mat.setAllSliders(self.patch.vco3.mat);
-    this.vco4mat.setAllSliders(self.patch.vco4.mat);
-
-    this.d0gain.value = this.patch.effects.delay.gain;
-    this.d0feedback.value = this.patch.effects.delay.feedback;
-    this.d0time.value = this.patch.effects.delay.time;
-  }
-
-  /**
-   * initPatch
-   *
-   * @memberof AudioPen
-   */
-  initPatch() {
-    const patchBank = JSON.parse(window.localStorage.getItem("patchBank"));
-    const patchNames = patchBank.map(patch => patch.name);
-
-    this.patch = {
-      name: `patch_${Date.now()}`,
+    this.patchBank.push({
+      name: patchName,
       vco1: {
         gain: self.vco1.gain,
         x: self.vco1._x.value,
@@ -414,47 +368,117 @@ class AudioPen {
           time: self.d0time.value,
         },
       },
-    };
+      editor: self.aceEditor.getValue(0)
+    });
 
-    this.patchBank = [this.patch];
+    if (this.patch) {
+      const patchString = JSON.stringify(this.patch);
+      const patchBankString = JSON.stringify(this.patchBank);
 
-    if (patchBank) {
-      this.patchBankSelect = new NexusUI.Select("#select-patch", {
-        size: [256, 28],
-        options: patchNames
-      });
+      console.log("audiopen: Saving patch");
+      window.localStorage.setItem("patch", patchString);
+      window.localStorage.setItem("patchBank", patchBankString);
     }
   }
 
   /**
-   * updatePatch
+   * loadPatch
    *
    * @memberof AudioPen
    */
-  updatePatch() {
-    let self = this;
+  loadPatch(name) {
+    this.patchBank.forEach((patch) => {
+      if (patch.name == name) {
+        this.vco1.x = patch.vco1.x;
+        this.vco1.y = patch.vco1.y;
 
-    this.patch.vco1.x = this.vco1._x.value;
-    this.patch.vco1.y = this.vco1._y.value;
-    this.patch.vco1.mat = this.vco1mat.values;
+        this.vco2.x = patch.vco2.x;
+        this.vco2.y = patch.vco2.y;
 
-    this.patch.vco2.x = this.vco2._x.value;
-    this.patch.vco2.y = this.vco2._y.value;
-    this.patch.vco2.mat = this.vco2mat.values;
+        this.vco3.x = patch.vco3.x;
+        this.vco3.y = patch.vco3.y;
 
-    this.patch.vco3.x = this.vco3._x.value;
-    this.patch.vco3.y = this.vco3._y.value;
-    this.patch.vco3.mat = this.vco3mat.values;
+        this.vco4.x = patch.vco4.x;
+        this.vco4.y = patch.vco4.y;
 
-    this.patch.vco4.x = this.vco4._x.value;
-    this.patch.vco4.y = this.vco4._y.value;
-    this.patch.vco4.mat = this.vco4mat.values;
+        this.vco1mat.setAllSliders(patch.vco1.mat);
+        this.vco2mat.setAllSliders(patch.vco2.mat);
+        this.vco3mat.setAllSliders(patch.vco3.mat);
+        this.vco4mat.setAllSliders(patch.vco4.mat);
 
-    this.patch.effects.delay.gain = this.d0gain.value;
-    this.patch.effects.delay.feedback = this.d0feedback.value;
-    this.patch.effects.delay.time = this.d0time.value;
+        this.d0gain.value = patch.effects.delay.gain;
+        this.d0feedback.value = patch.effects.delay.feedback;
+        this.d0time.value = patch.effects.delay.time;
 
-    this.patchBank.push(self.patch);
+        this.aceEditor.setValue(patch.editor, -1);        
+
+        this.codeLastChanged = Date.now();
+      }
+    });
+  }
+
+  /**
+   * initPatch
+   *
+   * @memberof AudioPen
+   */
+  initNewPatch() {
+    return {
+      name: `Default Patch`,
+      vco1: {
+        gain: this.vco1.gain,
+        x: this.vco1._x.value,
+        y: this.vco1._y.value,
+        mat: this.vco1mat.values,
+      },
+      vco2: {
+        gain: this.vco2.gain,
+        x: this.vco2._x.value,
+        y: this.vco2._y.value,
+        mat: this.vco2mat.values,
+      },
+      vco3: {
+        gain: this.vco3.gain,
+        x: this.vco3._x.value,
+        y: this.vco3._y.value,
+        mat: this.vco3mat.values,
+      },
+      vco4: {
+        gain: this.vco4.gain,
+        x: this.vco4._x.value,
+        y: this.vco4._y.value,
+        mat: this.vco4mat.values,
+      },
+      effects: {
+        delay: {
+          gain: this.d0gain.value,
+          feedback: this.d0feedback.value,
+          time: this.d0time.value,
+        },
+      },
+      editor: this.aceEditor.getValue(0)
+    };
+  }
+
+  initPatchBank() {
+    this.patch = this.initNewPatch();
+
+    const patchBank = JSON.parse(window.localStorage.getItem("patchBank"));
+
+    if (patchBank) {
+      this.patchBank = patchBank;
+
+      const patchNames = patchBank.map(({ name }) => name);
+
+      if (patchNames) {
+        this.patchBankSelect = new NexusUI.Select("#select-patch", {
+          size: [256, 28],
+          options: patchNames,
+        });
+      }
+    } else {      
+      this.patchBank = [this.patch];
+    }
   }
 
   /**
