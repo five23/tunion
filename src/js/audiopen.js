@@ -8,6 +8,7 @@
 import { Harmonic } from "./harmonic";
 import { AnalyserView } from "./analyser";
 import { Delay } from "./delay";
+import { initMidi } from "./midi";
 
 import ace from "ace-builds/src-noconflict/ace";
 import "ace-builds/src-noconflict/mode-javascript";
@@ -62,10 +63,10 @@ window.onload = () => {
     N: 0,
     out: 0,
     gain: 1,
-    vco1: 0,    
-    vco2: 0,    
-    vco3: 0,    
-    vco4: 0,    
+    vco1: 0,
+    vco2: 0,
+    vco3: 0,
+    vco4: 0,
     feedback: 0,
   };
 
@@ -78,6 +79,7 @@ window.onload = () => {
 
   self.addEventListener("resize", () => audiopen.resizePositionQuad(), true);
 };
+
 
 /**
  * AudioPen
@@ -98,11 +100,19 @@ class AudioPen {
     this.initFeedback();
     this.initPositionQuad();
     this.initVis();
-    this.initMidi();
+
+    initMidi();
+
+    const padding = 40;
+    const navHeight = 32;
+    const width = document.body.clientWidth - padding;
+    const height = window.innerHeight - navHeight - padding;
+    const quadWidth = width / 2;
+    const quadHeight = height / 2;
 
     this.view1crt = document.getElementById("view1crt");
-    this.view1crt.width = 800;
-    this.view1crt.height = 280;
+    this.view1crt.width = quadWidth;
+    this.view1crt.height = quadHeight;
     this.analyserView = new AnalyserView(this.view1crt);
     this.apiFunctionNames = ["process"];
     this.isPlaying = false;
@@ -115,6 +125,7 @@ class AudioPen {
     this.t = 0;
   }
 
+
   /**
    * start
    *
@@ -125,7 +136,7 @@ class AudioPen {
 
     this.initEditor();
     this.initToggles();
-    this.compileCode();
+    this.compileCode();    
 
     this.channelCount = 2;
 
@@ -155,6 +166,7 @@ class AudioPen {
     this.mainLoop();
   }
 
+
   /**
    * initEditor
    *
@@ -174,6 +186,7 @@ class AudioPen {
     });
   }
 
+
   /**
    * initToggles
    *
@@ -187,6 +200,12 @@ class AudioPen {
     this.initVisToggle();
   }
 
+
+  /**
+   * initVisToggle
+   *
+   * @memberof AudioPen
+   */
   initVisToggle() {
     let self = this;
     this.visToggle = new NexusUI.Toggle("#toggle-vis", {
@@ -203,6 +222,12 @@ class AudioPen {
     });
   }
 
+
+  /**
+   * initEffectsToggle
+   *
+   * @memberof AudioPen
+   */
   initEffectsToggle() {
     let self = this;
     this.effectsToggle = new NexusUI.Toggle("#toggle-effects", {
@@ -219,6 +244,12 @@ class AudioPen {
     });
   }
 
+
+  /**
+   * initMixerToggle
+   * 
+   * @memberof AudioPen
+   */
   initMixerToggle() {
     let self = this;
     this.mixerToggle = new NexusUI.Toggle("#toggle-mixer", {
@@ -235,6 +266,12 @@ class AudioPen {
     });
   }
 
+
+  /**
+   * initEditorToggle
+   *
+   * @memberof AudioPen
+   */
   initEditorToggle() {
     let self = this;
     this.editorToggle = new NexusUI.Toggle("#toggle-editor", {
@@ -251,6 +288,12 @@ class AudioPen {
     });
   }
 
+
+  /**
+   * initPlayToggle
+   *
+   * @memberof AudioPen
+   */
   initPlayToggle() {
     let self = this;
     this.playToggle = new NexusUI.TextButton("toggle-play", {
@@ -276,6 +319,77 @@ class AudioPen {
       self.audioCtx.suspend();
     }
   }
+
+
+  /**
+   * savePatch
+   *
+   * @memberof AudioPen
+   */
+  savePatch() {
+    this.updatePatch();
+
+    if (this.patch) {
+      const patchString = JSON.stringify(this.patch);
+
+      console.log('audiopen: Saving patch');
+      window.localStorage.setItem('patch', patchString);
+    }    
+  }
+  
+
+  /**
+   * loadPatch
+   *
+   * @memberof AudioPen
+   */
+  loadPatch() {    
+    this.patch = JSON.parse(window.localStorage.getItem('patch'));
+
+    this.vco1._x.value = this.patch.vco1.x;
+    this.vco1._y.value = this.patch.vco1.y;
+
+    this.vco2._x.value = this.patch.vco2.x;
+    this.vco2._y.value = this.patch.vco2.y;
+
+    this.vco3._x.value = this.patch.vco3.x;
+    this.vco3._y.value = this.patch.vco3.y;
+
+    this.vco4._x.value = this.patch.vco4.x;
+    this.vco4._y.value = this.patch.vco4.y;
+  }
+
+
+  /**
+   * updatePatch
+   *
+   * @memberof AudioPen
+   */
+  updatePatch() {
+    this.patch = {
+      vco1: {
+        gain: self.vco1.gain,
+        x: self.vco1._x.value,
+        y: self.vco1._y.value,
+      },
+      vco2: {
+        gain: self.vco2.gain,
+        x: self.vco2._x.value,
+        y: self.vco2._y.value,
+      },
+      vco3: {
+        gain: self.vco3.gain,
+        x: self.vco3._x.value,
+        y: self.vco3._y.value,
+      },
+      vco4: {
+        gain: self.vco4.gain,
+        x: self.vco3._x.value,
+        y: self.vco3._y.value,
+      },
+    };
+  }
+
 
   /**
    * initVis
@@ -305,83 +419,6 @@ class AudioPen {
     });
   }
 
-  /**
-   * Initialize MIDI stuff
-   *
-   * @memberof AudioPen
-   */
-  initMidi() {
-    /** @type {*} */
-    let midiMessage = document.getElementById("midi");
-
-    /**
-     * onMIDIAccess
-     *
-     * @param {*} midiAccessObject
-     */
-    const onMIDIAccess = (midiAccessObject) => {
-      let inputs = midiAccessObject.inputs.values();
-      for (
-        let input = inputs.next();
-        input && !input.done;
-        input = inputs.next()
-      ) {
-        input.value.onmidimessage = onMIDIMessage;
-      }
-    };
-
-    /**
-     * Convert MIDI note # to frequency in hertz
-     *
-     * @param {Number} b
-     * @param {Number} a
-     */
-    const MIDItoFreq = (b, a) =>
-      0 === a || (0 < a && 128 > a) ? 2 ** ((a - 69) / 12) * b : null;
-
-    /**
-     * onMIDIMessage
-     *
-     * @param {*} message
-     */
-    const onMIDIMessage = ({ data }) => {
-      let noteon = false;
-      let notemsg = "0, 0";
-      const note = data[1];
-      const pressure = data[2];
-      const frequency = MIDItoFreq(440, note);
-      if (pressure) {
-        noteon = true;
-      }
-      if (noteon) {
-        notemsg = `1, ${pressure}`;
-      }
-      midiMessage.innerHTML = `note: ${note}, msg: ${notemsg}, freq: ${frequency}`;
-    };
-
-    /**
-     * onMIDIAccessFailure
-     *
-     * @param {*} err
-     */
-    const onMIDIAccessFailure = (err) => {
-      console.log(
-        `No MIDI devices are available, or Web MIDI isn’t supported by this browser.`
-      );
-      console.log(
-        `Utilize Chris Wilson’s Web MIDI API Polyfill in order to use the Web MIDI API: http://cwilso.github.io/WebMIDIAPIShim/`
-      );
-      console.log(err);
-    };
-
-    if (navigator.requestMIDIAccess) {
-      navigator
-        .requestMIDIAccess({ sysex: false })
-        .then(onMIDIAccess, onMIDIAccessFailure);
-    } else {
-      console.warn(`This browser does not support MIDI.`);
-    }
-  }
 
   /**
    * initFeedback
@@ -396,7 +433,7 @@ class AudioPen {
       max: 1,
       step: 0.0001,
       candycane: 3,
-      values: [0.0, 0.0, 0.0, 0.0],
+      values: [0.0, 0.0, 0.0, 0.0, 0.0, 0.5],
       smoothing: 0,
       mode: "bar",
     });
@@ -408,7 +445,7 @@ class AudioPen {
       max: 1,
       step: 0.0001,
       candycane: 3,
-      values: [0.0, 0.0, 0.0, 0.0],
+      values: [0.0, 0.0, 0.0, 0.0, 0.0, 0.5],
       smoothing: 0,
       mode: "bar",
     });
@@ -420,7 +457,7 @@ class AudioPen {
       max: 1,
       step: 0.0001,
       candycane: 3,
-      values: [0.0, 0.0, 0.0, 0.0],
+      values: [0.0, 0.0, 0.0, 0.0, 0.0, 0.5],
       smoothing: 0,
       mode: "bar",
     });
@@ -432,7 +469,7 @@ class AudioPen {
       max: 1,
       step: 0.0001,
       candycane: 3,
-      values: [0.0, 0.0, 0.0, 0.0],
+      values: [0.0, 0.0, 0.0, 0.0, 0.0, 0.5],
       smoothing: 0,
       mode: "bar",
     });
@@ -445,10 +482,10 @@ class AudioPen {
    * @memberof AudioPen
    */
   processDrift() {
-    this.vco1.theta *= 1.0000000212335;
-    this.vco2.theta *= 0.9999999832434;
-    this.vco3.theta *= 1.0000000322735;
-    this.vco4.theta *= 0.9999999990125;
+    this.vco1.theta *= 1.00000001212335;
+    this.vco2.theta *= 0.99999999832434;
+    this.vco3.theta *= 1.00000001322735;
+    this.vco4.theta *= 0.99999998990125;
   }
 
 
@@ -460,36 +497,37 @@ class AudioPen {
   processVcoGain() {
     let self = this;
 
-    this.vco1.gain = H.lpf(self.vco1.gain, self.vco1mat.values[5]);
-    this.vco2.gain = H.lpf(self.vco2.gain, self.vco2mat.values[5]);
-    this.vco3.gain = H.lpf(self.vco3.gain, self.vco3mat.values[5]);
-    this.vco4.gain = H.lpf(self.vco4.gain, self.vco4mat.values[5]);
+    this.vco1.gain = H.lpf(self.vco1mat.values[5], self.vco1.gain);
+    this.vco2.gain = H.lpf(self.vco2mat.values[5], self.vco2.gain);
+    this.vco3.gain = H.lpf(self.vco3mat.values[5], self.vco3.gain);
+    this.vco4.gain = H.lpf(self.vco4mat.values[5], self.vco4.gain);
   }
 
 
   /**
    * processTheta
-   * 
+   *
    * @memberof AudioPen
    */
   processTheta() {
-    this.vco1.step = H.lpf(this.vco1._x.value, this.vco1.step);
-    this.vco1.N = H.lpf(this.vco1._y.value, this.vco1.N);
+    let self = this;
+
+    this.vco1.step = H.lpf(self.vco1._x.value, self.vco1.step);
+    this.vco2.step = H.lpf(self.vco2._x.value, self.vco2.step);
+    this.vco3.step = H.lpf(self.vco3._x.value, self.vco3.step);
+    this.vco4.step = H.lpf(self.vco4._x.value, self.vco4.step);
+
+    this.vco1.N = H.lpf(self.vco1._y.value, self.vco1.N);
+    this.vco2.N = H.lpf(self.vco2._y.value, self.vco2.N);
+    this.vco3.N = H.lpf(self.vco3._y.value, self.vco3.N);
+    this.vco4.N = H.lpf(self.vco4._y.value, self.vco4.N);
+
     this.vco1.theta += this.vco1.step;
-
-    this.vco2.step = H.lpf(this.vco2._x.value, this.vco2.step);
-    this.vco2.N = H.lpf(this.vco2._y.value, this.vco2.N);
     this.vco2.theta += this.vco2.step;
-
-    this.vco3.step = H.lpf(this.vco3._x.value, this.vco3.step);
-    this.vco3.N = H.lpf(this.vco3._y.value, this.vco3.N);
     this.vco3.theta += this.vco3.step;
-
-    this.vco4.step = H.lpf(this.vco4._x.value, this.vco4.step);
-    this.vco4.N = H.lpf(this.vco4._y.value, this.vco4.N);
-    this.vco4.theta += this.vco4.step;    
+    this.vco4.theta += this.vco4.step;
   }
-  
+
 
   /**
    * processFeedbackMatrix
@@ -499,13 +537,14 @@ class AudioPen {
   processFeedbackMatrix() {
     let self = this;
 
-    this.vco1.vco1 = self.vco1mat.values[0] * this.vco1.out;    
-    this.vco1.vco2 = self.vco1mat.values[1] * this.vco2.out;   
-    this.vco1.vco3 = self.vco1mat.values[2] * this.vco3.out; 
-    this.vco1.vco4 = self.vco1mat.values[3] * this.vco4.out;    
+    this.vco1.vco1 = self.vco1mat.values[0] * this.vco1.out;
+    this.vco1.vco2 = self.vco1mat.values[1] * this.vco2.out;
+    this.vco1.vco3 = self.vco1mat.values[2] * this.vco3.out;
+    this.vco1.vco4 = self.vco1mat.values[3] * this.vco4.out;
 
     this.vco1.feedback =
-      0.25 * (this.vco1.vco1 + this.vco1.vco2 + this.vco1.vco3 + this.vco1.vco4);
+      0.25 *
+      (this.vco1.vco1 + this.vco1.vco2 + this.vco1.vco3 + this.vco1.vco4);
 
     this.vco2.vco1 = self.vco2mat.values[0] * this.vco1.out;
     this.vco2.vco2 = self.vco2mat.values[1] * this.vco2.out;
@@ -513,7 +552,8 @@ class AudioPen {
     this.vco2.vco4 = self.vco2mat.values[3] * this.vco4.out;
 
     this.vco2.feedback =
-      -0.25 * (this.vco2.vco2 + this.vco2.vco1 + this.vco2.vco3 + this.vco2.vco4);
+      -0.25 *
+      (this.vco2.vco2 + this.vco2.vco1 + this.vco2.vco3 + this.vco2.vco4);
 
     this.vco3.vco1 = self.vco3mat.values[0] * this.vco1.out;
     this.vco3.vco2 = self.vco3mat.values[1] * this.vco2.out;
@@ -521,7 +561,8 @@ class AudioPen {
     this.vco3.vco4 = self.vco3mat.values[3] * this.vco4.out;
 
     this.vco3.feedback =
-      0.25 * (this.vco3.vco1 + this.vco3.vco2 + this.vco3.vco3 + this.vco3.vco4);
+      0.25 *
+      (this.vco3.vco1 + this.vco3.vco2 + this.vco3.vco3 + this.vco3.vco4);
 
     this.vco4.vco1 = self.vco4mat.values[0] * this.vco1.out;
     this.vco4.vco2 = self.vco4mat.values[1] * this.vco2.out;
@@ -529,9 +570,10 @@ class AudioPen {
     this.vco4.vco4 = self.vco4mat.values[3] * this.vco4.out;
 
     this.vco4.feedback =
-      -0.25 * (this.vco4.vco2 + this.vco4.vco1 + this.vco4.vco3 + this.vco4.vco4);
+      -0.25 *
+      (this.vco4.vco2 + this.vco4.vco1 + this.vco4.vco3 + this.vco4.vco4);
   }
-
+  
 
   /**
    * initDelay

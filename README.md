@@ -20,7 +20,12 @@
 Successfully built files will be placed in the `/dist` folder
 
 ### Task List
+
+- [ ] Patch romper
 - [ ] Explanation
 - [ ] Documentation
 - [ ] Tests
 - [ ] Simpler UI
+- [ ] MIDI
+- [ ] WebWorkers
+- [ ] Physics

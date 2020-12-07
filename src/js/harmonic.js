@@ -195,21 +195,16 @@ export class Harmonic {
 
     /* TODO: this should return Complex Infinity */
     if (Math.abs(x) < Number.EPSILON || (Number.isInteger(x) && x < 0)) {
-      //console.log(`digamma12 -> Infinity`);
       return Infinity;
     }
     /* Special values at positive integers (table lookup) */
     if (Number.isInteger(x) && x < 12) {
       const v = this.GAMMAINT[x - 1] - this.GAMMA;
-      //console.log(`digamma12 -> Special value at positive integer`);
-      //console.log(`digamma12 -> ${v}`);
       return v;
     }
     /* Special values at positive half-integers (table lookup) */
     if (Number.isInteger(x - 1 / 2) && x < 25 / 2) {
       const v = this.GAMMAHALFINT[x - 1 / 2] - this.GAMMA - this.TWOLN2;
-      //console.log(`digamma12 -> Special value at positive half-integer`);
-      //console.log(`digamma12 -> ${v}`);
       return v;
     }
     /* Small values (0.000001) */
@@ -217,15 +212,15 @@ export class Harmonic {
       /* Positive x*/
       if (x > 0) {              
         const v = this.GAMMA - 1 / x + this.ZETA2;
-        x = x.toFixed(6);
-        console.log(`digamma12(${x}) => eulergamma - 1/${x} + zeta(2) => ${v} [recursion]`);
+        //x = x.toFixed(6);
+        //console.log(`digamma12(${x}) => eulergamma - 1/${x} + zeta(2) => ${v} [recursion]`);
         return v;
       }
       /* Negative x */
       if (x < 0) {
         const v = this.digamma12(1 - x) + Math.PI / Math.tan(-Math.PI * x);
-        x = x.toFixed(6);
-        console.log(`digamma12(${x}) => digamma12(1 - ${x}) + pi/tan(-pi * ${x}) => ${v} [reflection]`);
+        //x = x.toFixed(6);
+        //console.log(`digamma12(${x}) => digamma12(1 - ${x}) + pi/tan(-pi * ${x}) => ${v} [reflection]`);
         return v;
       }
     }
@@ -289,9 +284,9 @@ export class Harmonic {
    * @return {Number}
    */
   sqr12(x, N, P) {
-    if (!P) P = 32;
+    if (!P) P = 12;
     x *= this.OMEGA;
-    const b = 12 * N * Math.cos(x);
+    const b = 8 * N * Math.cos(x);
     const d = this.digamma12(0.75 - b, P) - this.digamma12(0.25 - b, P);
     const v = Math.cos(this.TAU * b) * d/Math.PI - 1;
     return 0.5 * v;
