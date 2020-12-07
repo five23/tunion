@@ -102,17 +102,6 @@ class AudioPen {
 
     initMidi();
 
-    const padding = 40;
-    const navHeight = 32;
-    const width = document.body.clientWidth - padding;
-    const height = window.innerHeight - navHeight - padding;
-    const quadWidth = width / 2;
-    const quadHeight = height / 2;
-
-    this.view1crt = document.getElementById("view1crt");
-    this.view1crt.width = quadWidth;
-    this.view1crt.height = quadHeight;
-    this.analyserView = new AnalyserView(this.view1crt);
     this.apiFunctionNames = ["process"];
     this.isPlaying = false;
     this.compiledCode = null;
@@ -280,7 +269,7 @@ class AudioPen {
    */
   initPatchButtons() {
     let self = this;
-    let savePatch = new NexusUI.TextButton("#save-patch", {
+    const savePatch = new NexusUI.TextButton("#save-patch", {
       text: "▼",
       size: [32, 32],
       state: false,
@@ -354,19 +343,30 @@ class AudioPen {
    * @memberof AudioPen
    */
   loadPatch() {
+    let self = this;
+    
     this.patch = JSON.parse(window.localStorage.getItem("patch"));
 
-    this.vco1._x.value = this.patch.vco1.x;
-    this.vco1._y.value = this.patch.vco1.y;
+    this.vco1.x = this.patch.vco1.x;
+    this.vco1.y = this.patch.vco1.y;
 
-    this.vco2._x.value = this.patch.vco2.x;
-    this.vco2._y.value = this.patch.vco2.y;
+    this.vco2.x = this.patch.vco2.x;
+    this.vco2.y = this.patch.vco2.y;
 
-    this.vco3._x.value = this.patch.vco3.x;
-    this.vco3._y.value = this.patch.vco3.y;
+    this.vco3.x = this.patch.vco3.x;
+    this.vco3.y = this.patch.vco3.y;
 
-    this.vco4._x.value = this.patch.vco4.x;
-    this.vco4._y.value = this.patch.vco4.y;
+    this.vco4.x = this.patch.vco4.x;
+    this.vco4.y = this.patch.vco4.y;
+  
+    this.vco1mat.setAllSliders(self.patch.vco1.mat);
+    this.vco2mat.setAllSliders(self.patch.vco2.mat);
+    this.vco3mat.setAllSliders(self.patch.vco3.mat);
+    this.vco4mat.setAllSliders(self.patch.vco4.mat);
+
+    this.d0gain.value = this.patch.effects.delay.gain;
+    this.d0feedback.value = this.patch.effects.delay.feedback;
+    this.d0time.value = this.patch.effects.delay.time;
   }
 
   /**
@@ -376,27 +376,43 @@ class AudioPen {
    */
   initPatch() {
     this.patch = {
+      name: `patch_${Date.now()}`,
       vco1: {
         gain: self.vco1.gain,
         x: self.vco1._x.value,
         y: self.vco1._y.value,
+        mat: self.vco1mat.values,
       },
       vco2: {
         gain: self.vco2.gain,
         x: self.vco2._x.value,
         y: self.vco2._y.value,
+        mat: self.vco2mat.values,
       },
       vco3: {
         gain: self.vco3.gain,
         x: self.vco3._x.value,
         y: self.vco3._y.value,
+        mat: self.vco3mat.values,
       },
       vco4: {
         gain: self.vco4.gain,
-        x: self.vco3._x.value,
-        y: self.vco3._y.value,
+        x: self.vco4._x.value,
+        y: self.vco4._y.value,
+        mat: self.vco4mat.values,
       },
+      effects: {
+        delay: {
+          gain: self.d0gain.value,
+          feedback: self.d0feedback.value,
+          time: self.d0time.value
+        }
+      }
     };
+
+    this.patchBank = [
+      this.patch
+    ];    
   }
 
   /**
@@ -407,15 +423,23 @@ class AudioPen {
   updatePatch() {
     this.patch.vco1.x = this.vco1._x.value;
     this.patch.vco1.y = this.vco1._y.value;
+    this.patch.vco1.mat = this.vco1mat.values;
 
     this.patch.vco2.x = this.vco2._x.value;
     this.patch.vco2.y = this.vco2._y.value;
+    this.patch.vco2.mat = this.vco2mat.values;
 
     this.patch.vco3.x = this.vco3._x.value;
     this.patch.vco3.y = this.vco3._y.value;
+    this.patch.vco3.mat = this.vco3mat.values;
 
     this.patch.vco4.x = this.vco4._x.value;
     this.patch.vco4.y = this.vco4._y.value;
+    this.patch.vco4.mat = this.vco4mat.values;
+    
+    this.patch.effects.delay.gain = this.d0gain.value;
+    this.patch.effects.delay.feedback = this.d0feedback.value;
+    this.patch.effects.delay.time = this.d0time.value;
   }
 
   /**
@@ -426,10 +450,24 @@ class AudioPen {
   initVis() {
     let self = this;
 
+    const padding = 20;
+    const navHeight = 48;
+    const screenWidth = document.body.clientWidth - padding * 2;
+    const screenHeight = window.innerHeight - navHeight - padding * 3;
+    const visWidth = screenWidth / 2;
+    const visHeight = screenHeight / 3;
+
+    this.view1crt = document.getElementById("view1crt");
+
+    this.view1crt.width = visWidth;
+    this.view1crt.height = visHeight;
+
+    this.analyserView = new AnalyserView(this.view1crt);
+
     this.view1sel =
       this.view1sel ||
       new NexusUI.Select("#view1sel", {
-        size: [800, 28],
+        size: [visWidth, 28],
         options: ["frequency", "sonogram", "3d sonogram", "waveform"],
       });
 
@@ -438,11 +476,11 @@ class AudioPen {
     });
 
     this.view1 = new NexusUI.Oscilloscope("#view1", {
-      size: [800, 280],
+      size: [visWidth, visHeight],
     });
 
     this.spec1 = new NexusUI.Spectrogram("#spec1", {
-      size: [800, 280],
+      size: [visWidth, visHeight],
     });
   }
 
