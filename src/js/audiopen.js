@@ -560,10 +560,10 @@ class AudioPen {
    * @memberof AudioPen
    */
   processDrift() {
-    this.vco1.theta *= 1.00000001212335;
-    this.vco2.theta *= 0.99999999832434;
-    this.vco3.theta *= 1.00000001322735;
-    this.vco4.theta *= 0.99999998990125;
+    this.vco1.theta *= 1.0000000112;
+    this.vco2.theta *= 0.9999999886;
+    this.vco3.theta *= 1.0000000123;
+    this.vco4.theta *= 0.9999999875;
   }
 
   /**
@@ -627,7 +627,7 @@ class AudioPen {
     this.vco2.vco4 = self.vco2mat.values[3] * this.vco4.out;
 
     this.vco2.feedback =
-      -0.25 *
+      0.25 *
       (this.vco2.vco2 + this.vco2.vco1 + this.vco2.vco3 + this.vco2.vco4);
 
     this.vco3.vco1 = self.vco3mat.values[0] * this.vco1.out;
@@ -645,7 +645,7 @@ class AudioPen {
     this.vco4.vco4 = self.vco4mat.values[3] * this.vco4.out;
 
     this.vco4.feedback =
-      -0.25 *
+      0.25 *
       (this.vco4.vco2 + this.vco4.vco1 + this.vco4.vco3 + this.vco4.vco4);
   }
 
@@ -670,7 +670,7 @@ class AudioPen {
       interaction: "radial", // "radial", "vertical", or "horizontal"
       mode: "relative", // "absolute" or "relative"
       min: 0,
-      max: 0.9,
+      max: 0.95,
       step: 0.0000001,
       value: 0,
     });
@@ -679,7 +679,7 @@ class AudioPen {
       size: [128, 128],
       interaction: "radial", // "radial", "vertical", or "horizontal"
       mode: "relative", // "absolute" or "relative"
-      min: 256,
+      min: 32,
       max: 30000,
       step: 1,
       value: 4096,

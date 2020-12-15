@@ -286,9 +286,8 @@ export class Harmonic {
   sqr12(x, N, P) {
     if (!P) P = 16;
     x *= this.OMEGA;
-    const b = 12 * N * Math.cos(x);
-    const d = this.digamma12(0.75 - b, P) - this.digamma12(0.25 - b, P);
-    const v = Math.cos(this.TAU * b) * d/Math.PI - 1;
+    const b = 8 * N * Math.cos(x);    
+    const v = Math.cos(this.TAU * b) * (this.digamma12(0.75 - b, P) - this.digamma12(0.25 - b, P))/Math.PI - 1;
     return 0.5 * v;
   }
 
