@@ -1,7 +1,13 @@
-// @ts-ignore
 import * as React from 'react';
 import { render } from 'react-dom';
 import { Position } from 'react-nexusui';
+import { useTheme } from '@material-ui/core/styles';
+
+export default function Vco() {
+  const theme = useTheme();
+
+  return <Core />;
+}
 
 function TitleAndChildren({ children, title }) {
   return (
@@ -34,13 +40,3 @@ function Core() {
     </section>
   );
 }
-
-function App() {
-  return (
-    <>
-      <Core />
-    </>
-  );
-}
-
-render(<App />, document.getElementById('app'));
