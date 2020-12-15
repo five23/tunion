@@ -23,6 +23,7 @@ Successfully built files will be placed in the `/dist` folder
 ### Task List
 
 - [ ] Patch romper
+- [ ] Make it sane on mobile
 - [ ] Explanation
 - [ ] Documentation
 - [ ] Tests

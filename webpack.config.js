@@ -1,48 +1,48 @@
-const HtmlWebpackPlugin = require('html-webpack-plugin')
-const CopyWebpackPlugin = require('copy-webpack-plugin')
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = [
   {
     module: {
       rules: [
         {
-          test: /\.(js|jsx)$/,
+          test: /\.(ts|tsx|js|jsx)$/,
           exclude: /(node_modules)/,
           use: {
-            loader: 'babel-loader'
-          }
+            loader: "babel-loader",
+          },
         },
         {
           test: /\.html$/,
           use: [
             {
-              loader: 'html-loader'
-            }
-          ]
+              loader: "html-loader",
+            },
+          ],
         },
         {
           test: /\.jpe?g$|\.ico$|\.gif$|\.png$|\.svg$|\.woff$|\.ttf$|\.wav$|\.mp3$/,
           use: [
             {
-              loader: 'url-loader'
-            }
-          ]
+              loader: "url-loader",
+            },
+          ],
         },
         {
           test: /\.s[ac]ss$/i,
-          use: ['style-loader', 'css-loader', 'sass-loader']
-        }
-      ]
+          use: ["style-loader", "css-loader", "sass-loader"],
+        },
+      ],
     },
     plugins: [
       new HtmlWebpackPlugin({
-        template: './src/index.html',
-        filename: './index.html',
-        minify: false
+        template: "./src/index.html",
+        filename: "./index.html",
+        minify: false,
       }),
       new CopyWebpackPlugin({
-        patterns: [{ from: 'src/favicon.ico', to: '.' }]
-      })
-    ]
-  }
-]
+        patterns: [{ from: "src/favicon.ico", to: "." }],
+      }),
+    ],
+  },
+];
