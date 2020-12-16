@@ -56,6 +56,7 @@ export default function Editor(props) {
    */
   function onChange(newValue) {
     console.log('change', newValue);
+    window.audiopen.codeLastChanged = Date.now();
   }
 
   /**
@@ -80,9 +81,6 @@ export default function Editor(props) {
       highlightActiveLine={false}
       value={defaultRack}
       setOptions={{
-        enableBasicAutocompletion: false,
-        enableLiveAutocompletion: false,
-        enableSnippets: false,
         showLineNumbers: true,
         tabSize: 2
       }}

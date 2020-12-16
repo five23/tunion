@@ -1,28 +1,39 @@
 import React from 'react';
+
+import Audiopen from './Audiopen';
+
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+export const audiopen = new Audiopen(audioCtx);
+
+window.audiopen = audiopen;
+
 import clsx from 'clsx';
 import {
-  Typography,
   CssBaseline,
   AppBar,
   Toolbar,
   IconButton,
-  Badge,
   Drawer,
   Divider,
-  List,
   Container
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import NotificationsIcon from '@material-ui/icons/Notifications';
 
-import { mainListItems, secondaryListItems } from './listItems.tsx';
+import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline';
+import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline';
+
+//import EjectIcon from '@material-ui/icons/Eject';
+//import ReplayIcon from '@material-ui/icons/Replay';
+//import Replay5Icon from '@material-ui/icons/Replay5';
+//import Replay10Icon from '@material-ui/icons/Replay10';
+//import Replay30Icon from '@material-ui/icons/Replay30';
 
 import Scopes from './Scopes.tsx';
 import Effects from './Effects.tsx';
-import VcoBank from './VcoBank.tsx';
-import SpeedDial from './SpeedDial.tsx';
+import Vcos from './Vcos.tsx';
+//import SpeedDial from './SpeedDial.tsx';
 import Editor from './Editor.tsx';
 
 const drawerWidth = 400;
@@ -30,9 +41,6 @@ const drawerWidth = 400;
 const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex'
-  },
-  toolbar: {
-    paddingRight: 0 // keep right padding when drawer closed
   },
   toolbarIcon: {
     display: 'flex',
@@ -127,6 +135,14 @@ export default function Tunion() {
     setOpen(false);
   };
 
+  const toggleIsPlaying = (): void => {
+    window.audiopen.isPlaying = true;
+
+    if (!window.audiopen.isStarted) {
+      window.audiopen.start();
+    }
+  };
+
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
   return (
@@ -136,7 +152,7 @@ export default function Tunion() {
         position="absolute"
         className={clsx(classes.appBar, open && classes.appBarShift)}
       >
-        <Toolbar className={classes.toolbar}>
+        <Toolbar>
           <IconButton
             edge="start"
             color="inherit"
@@ -149,19 +165,8 @@ export default function Tunion() {
           >
             <MenuIcon />
           </IconButton>
-          <Typography
-            component="h1"
-            variant="h6"
-            color="inherit"
-            noWrap
-            className={classes.title}
-          >
-            Tunion
-          </Typography>
           <IconButton color="inherit">
-            <Badge badgeContent={4} color="secondary">
-              <NotificationsIcon />
-            </Badge>
+            <PlayCircleOutlineIcon onClick={toggleIsPlaying} />
           </IconButton>
         </Toolbar>
       </AppBar>
@@ -184,7 +189,7 @@ export default function Tunion() {
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
         <Container maxWidth="lg" className={classes.container}>
-          <VcoBank />
+          <Vcos />
         </Container>
         <Container maxWidth="lg" className={classes.container}>
           <Effects />

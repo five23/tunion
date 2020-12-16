@@ -10,6 +10,7 @@ export default class Audiopen {
     this.audioCtx = audioCtx;
     this.apiFunctionNames = ['process'];
     this.isPlaying = false;
+    this.isStarted = false;
     this.compiledCode = null;
     this.codeLastChanged = 0;
     this.codeLastCompiled = 0;
@@ -24,11 +25,47 @@ export default class Audiopen {
    *
    * @memberof Audiopen
    */
-  start() {
+  start() {    
     const self = this;
 
-    this.initEditor(self);
-    this.compileCode();
+    this.isStarted = true;
+    
+    const defaultRack = `function process(buffer) {  
+      for (var t = 0; t < buffer.length; ++t) {    
+        audiopen.processTheta();
+    
+        const vco1N = vco1.N * vco1.feedback;
+        const vco2N = vco2.N + vco2.feedback;
+        const vco3N = vco3.N * vco3.feedback;
+        const vco4N = vco4.N * vco4.feedback;
+    
+        vco1.out = H.sqr12(vco1.theta, vco1N);
+        vco2.out = H.saw12(vco2.theta, vco2N);
+        vco3.out = H.saw12(vco3.theta, vco3N);
+        vco4.out = H.tri12(vco4.theta, vco4N);
+        
+        audiopen.processFeedbackMatrix();
+        audiopen.processVcoGain();
+    
+        out = vco1.gain*vco1.out + 
+              vco2.gain*vco2.out + 
+              vco3.gain*vco3.out + 
+              vco4.gain*vco4.out;
+        
+        const delayOut = delay
+            .gain(d0gain.value)
+            .feedback(d0feedback.value)
+            .time(d0time.value)
+            .run(0.25*out);
+    
+        buffer[t] = 0.5*(0.25*out+delayOut);
+    
+        audiopen.processDrift();
+      }
+    }`;
+    
+    //this.initEditor(self);
+    this.compileCode(defaultRack);
 
     this.channelCount = 2;
 
@@ -47,11 +84,11 @@ export default class Audiopen {
     this.scriptNode.connect(self.analyser);
     this.scriptNode.connect(self.audioCtx.destination);
 
-    this.view1.connect(self.scriptNode);
-    this.spec1.connect(self.scriptNode);
+    //this.view1.connect(self.scriptNode);
+    //this.spec1.connect(self.scriptNode);
 
-    this.analyserView.initByteBuffer(self.analyser);
-    this.amplitudeData = new Uint8Array(self.analyser.frequencyBinCount);
+    //this.analyserView.initByteBuffer(self.analyser);
+    //this.amplitudeData = new Uint8Array(self.analyser.frequencyBinCount);
 
     this.mainLoop();
   }
@@ -262,10 +299,8 @@ export default class Audiopen {
    * @return {*}
    * @memberof Audiopen
    */
-  compileCode() {
-    const self = this;
-
-    let code = self.aceEditor.getValue();
+  compileCode(code) {
+    const self = this;    
 
     code += 'return { process };';
 
@@ -299,7 +334,7 @@ export default class Audiopen {
     buffer = this.compiledCode.process(buffer);
 
     // this.analyserView.doFrequencyAnalysis(self.analyser);
-
+/*
     const { freqByteData } = this.analyserView;
 
     switch (this.analyserView.analysisType) {
@@ -325,7 +360,7 @@ export default class Audiopen {
         break;
     }
 
-    this.analyserView.drawGL();
+    this.analyserView.drawGL();*/
   }
 
   /**

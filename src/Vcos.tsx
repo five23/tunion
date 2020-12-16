@@ -1,10 +1,5 @@
 import React, { JSX } from 'react';
-import {
-  Card,
-  CardContent,
-  Grid,
-  Typography
-} from '@material-ui/core';
+import { Card, CardContent, Grid, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { Position } from 'react-nexusui';
 
@@ -52,28 +47,31 @@ function onPositionChange() {
 }
 
 /**
- * VcoBank
+ * Vcos
  *
  * @export
  * @return {*}  {JSX.Element}
  */
-export default function VcoBank(): JSX.Element {
+export default function Vcos(): JSX.Element {
   const classes = useStyles();
 
   return (
-    <Grid container spacing={4}>
-      {cards.map(
-        (card): JSX.Element => (
-          <Grid item key={card} xs={12} sm={6} md={4}>
-            <Card className={classes.card}>
-              <CardContent className={classes.cardContent}>
-                <Typography>VCO</Typography>
-                <Position onChange={onPositionChange} />
-              </CardContent>
-            </Card>
-          </Grid>
-        )
-      )}
-    </Grid>
+    <>
+      <h1>Scopes</h1>
+      <Grid container spacing={4}>
+        {cards.map(
+          (card): JSX.Element => (
+            <Grid item key={card} xs={12} sm={6} md={4}>
+              <Card className={classes.card}>
+                <CardContent className={classes.cardContent}>
+                  <Typography>VCO</Typography>
+                  <Position onChange={onPositionChange} />
+                </CardContent>
+              </Card>
+            </Grid>
+          )
+        )}
+      </Grid>
+    </>
   );
 }
