@@ -1,4 +1,4 @@
-import * as React from "react";
+import * as React from 'react';
 import {
   AppBar,
   Container,
@@ -9,13 +9,14 @@ import {
   Toolbar,
   Typography,
   IconButton,
-} from "@material-ui/core";
-import MenuIcon from "@material-ui/icons/Menu";
-import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
-import { Toggle } from "react-nexusui";
-import Scope from "./Scope.tsx";
-import Effects from "./Effects.tsx";
-import Vco from "./Vco.tsx";
+} from '@material-ui/core';
+
+import MenuIcon from '@material-ui/icons/Menu';
+import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+import { Toggle } from 'react-nexusui';
+import Scope from './Scope.tsx';
+import Effects from './Effects.tsx';
+import Vco from './Vco.tsx';
 
 export default function Dashboard() {
   const [open, setOpen] = React.useState(false);
