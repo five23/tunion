@@ -3,24 +3,48 @@ module.exports = {
     browser: true,
     node: true,
     worker: true,
-    es2021: true,
+    es2021: true
   },
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:react/recommended',
-    'airbnb',
+    'airbnb'
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaFeatures: {
-      jsx: true,
+      jsx: true
     },
     ecmaVersion: 12,
-    sourceType: 'module',
+    sourceType: 'module'
   },
   plugins: ['react', '@typescript-eslint'],
   rules: {
-    'react/jsx-filename-extension': [1, { extensions: ['.tsx', '.ts'] }],
-  },
+    'comma-dangle': [
+      'error',
+      {
+        arrays: 'never',
+        objects: 'never',
+        imports: 'never',
+        exports: 'never',
+        functions: 'never'
+      }
+    ],
+    'no-use-before-define': [
+      'error', 
+      { 
+        imports: 'never'
+      }
+    ],
+    'react/jsx-filename-extension': [
+      1, 
+      { 
+        extensions: [
+          '.tsx', 
+          '.ts'
+        ] 
+      }
+    ]
+  }
 };
