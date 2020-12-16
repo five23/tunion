@@ -14,11 +14,12 @@ import {
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import { Toggle } from 'react-nexusui';
-import Scope from './Scope.tsx';
+import Scopes from './Scopes.tsx';
 import Effects from './Effects.tsx';
 import Vco from './Vco.tsx';
+import Settings from './Settings.tsx';
 
-export default function Dashboard() {
+export default function Dashboard(): JSX.Element {
   const [open, setOpen] = React.useState(false);
 
   const toggleDrawer = () => {
@@ -28,12 +29,11 @@ export default function Dashboard() {
   const [playing, setPlaying] = React.useState(false);
 
   const toggleAudio = (value) => {
-    console.log(value);
-    setPlaying(!playing);
+    setPlaying(value);
   };
 
   return (
-    <div>
+    <>      
       <CssBaseline />
       <AppBar position="absolute">
         <Toolbar>
@@ -74,12 +74,17 @@ export default function Dashboard() {
             </Grid>
             <Grid item xs={12}>
               <Paper>
-                <Scope />
+                <Scopes />
+              </Paper>
+            </Grid>
+            <Grid item xs={12}>
+              <Paper>
+                <Settings />
               </Paper>
             </Grid>
           </Grid>
         </Container>
       </main>
-    </div>
+    </>
   );
 }

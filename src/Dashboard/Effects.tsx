@@ -1,13 +1,11 @@
 import * as React from 'react';
+import { Dial } from 'react-nexusui';
 
-function preventDefault(event: React.MouseEvent) {
-  event.preventDefault();
-}
-
-export default function Effects() {
+export default function Scopes() {
   return (
     <>
-      <h1>fx</h1>
+      <h1>Scopes</h1>
+      <Dial />
     </>
   );
 }

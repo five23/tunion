@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { Oscilloscope } from 'react-nexusui';
 
-export default function Scope() {
+export default function Scopes() {
   return (
     <>
-      <h1>Scope</h1>
+      <h1>Scopes</h1>
       <Oscilloscope />
     </>
   );
