@@ -17,11 +17,20 @@ import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 
+import AceEditor from 'react-ace';
+
+import * as ace from 'ace-builds';
+import 'ace-builds/src-noconflict/mode-java';
+import 'ace-builds/src-noconflict/theme-github';
+import 'ace-builds/src-noconflict/ext-language_tools';
+import 'ace-builds/webpack-resolver';
+
 import { mainListItems, secondaryListItems } from './listItems.tsx';
 
 import Scopes from './Scopes.tsx';
 import Effects from './Effects.tsx';
 import VcoBank from './VcoBank.tsx';
+import SpeedDial from './SpeedDial.tsx';
 
 const drawerWidth = 240;
 
@@ -108,7 +117,7 @@ const useStyles = makeStyles((theme) => ({
  * Dashboard
  *
  * @export
- * @return {*} 
+ * @return {*}
  */
 export default function Dashboard() {
   const classes = useStyles();
@@ -121,6 +130,10 @@ export default function Dashboard() {
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
+  function onChange(newValue) {
+    console.log('change', newValue);
+  }
+  
   return (
     <div className={classes.root}>
       <CssBaseline />
@@ -169,6 +182,19 @@ export default function Dashboard() {
             <ChevronLeftIcon />
           </IconButton>
         </div>
+
+        <AceEditor
+          mode="java"
+          theme="github"
+          onChange={onChange}
+          name="UNIQUE_ID_OF_DIV"
+          editorProps={{ $blockScrolling: true }}
+          setOptions={{
+            enableBasicAutocompletion: true,
+            enableLiveAutocompletion: true,
+            enableSnippets: true
+          }}
+        />
         <Divider />
         <List>{mainListItems}</List>
         <Divider />
@@ -177,13 +203,13 @@ export default function Dashboard() {
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
         <Container maxWidth="lg" className={classes.container}>
-          <VcoBank />          
+          <VcoBank />
         </Container>
         <Container maxWidth="lg" className={classes.container}>
-          <Effects />          
+          <Effects />
         </Container>
         <Container maxWidth="lg" className={classes.container}>
-          <Scopes />          
+          <Scopes />
         </Container>
       </main>
     </div>
