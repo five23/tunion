@@ -12,6 +12,12 @@ import {
 
 import Draggable from 'react-draggable';
 
+/**
+ * PaperComponent
+ *
+ * @param {*} props
+ * @return {*} 
+ */
 function PaperComponent(props) {
   return (
     <Draggable
@@ -23,6 +29,12 @@ function PaperComponent(props) {
   );
 }
 
+/**
+ * Settings
+ *
+ * @export
+ * @return {*} 
+ */
 export default function Settings() {
   const [open, setOpen] = React.useState(false);
 

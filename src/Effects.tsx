@@ -1,10 +1,16 @@
 import * as React from 'react';
 import { Dial } from 'react-nexusui';
 
-export default function Scopes() {
+/**
+ * Effects
+ *
+ * @export
+ * @return {*} 
+ */
+export default function Effects() {
   return (
     <>
-      <h1>Scopes</h1>
+      <h1>Effects</h1>
       <Dial />
     </>
   );

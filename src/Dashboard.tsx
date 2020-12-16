@@ -2,7 +2,6 @@ import React from 'react';
 import clsx from 'clsx';
 import {
   Typography,
-  Link,
   CssBaseline,
   AppBar,
   Toolbar,
@@ -11,19 +10,17 @@ import {
   Drawer,
   Divider,
   List,
-  Container,
-  Grid,
-  Paper,
-  Box
+  Container
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
+
 import { mainListItems, secondaryListItems } from './listItems.tsx';
-import Chart from './Chart.tsx';
-import Deposits from './Deposits.tsx';
-import Orders from './Orders.tsx';
+
+import Scopes from './Scopes.tsx';
+import Effects from './Effects.tsx';
 import VcoBank from './VcoBank.tsx';
 
 const drawerWidth = 240;
@@ -107,6 +104,12 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
+/**
+ * Dashboard
+ *
+ * @export
+ * @return {*} 
+ */
 export default function Dashboard() {
   const classes = useStyles();
   const [open, setOpen] = React.useState(true);
@@ -174,29 +177,13 @@ export default function Dashboard() {
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
         <Container maxWidth="lg" className={classes.container}>
-          <Grid container spacing={3}>
-            {/* Chart */}
-            <Grid item xs={12} md={8} lg={9}>
-              <Paper className={fixedHeightPaper}>
-                <Chart />
-              </Paper>
-            </Grid>
-            {/* Recent Deposits */}
-            <Grid item xs={12} md={4} lg={3}>
-              <Paper className={fixedHeightPaper}>
-                <Deposits />
-              </Paper>
-            </Grid>
-            {/* Recent Orders */}
-            <Grid item xs={12}>
-              <Paper className={classes.paper}>
-                <Orders />
-              </Paper>
-            </Grid>
-          </Grid>
-          <Box pt={4}>
-            <VcoBank />
-          </Box>
+          <VcoBank />          
+        </Container>
+        <Container maxWidth="lg" className={classes.container}>
+          <Effects />          
+        </Container>
+        <Container maxWidth="lg" className={classes.container}>
+          <Scopes />          
         </Container>
       </main>
     </div>

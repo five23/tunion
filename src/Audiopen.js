@@ -1,4 +1,4 @@
-import AnalyserView from "./js/analyser";
+import AnalyserView from './js/analyser';
 
 /**
  * Audiopen
@@ -8,7 +8,7 @@ import AnalyserView from "./js/analyser";
 export default class Audiopen {
   constructor(audioCtx) {
     this.audioCtx = audioCtx;
-    this.apiFunctionNames = ["process"];
+    this.apiFunctionNames = ['process'];
     this.isPlaying = false;
     this.compiledCode = null;
     this.codeLastChanged = 0;
@@ -62,13 +62,13 @@ export default class Audiopen {
    * @memberof Audiopen
    */
   initEditor(self) {
-    ace.config.setModuleUrl("ace/mode/javascript_worker", jsWorkerUrl);
+    ace.config.setModuleUrl('ace/mode/javascript_worker', jsWorkerUrl);
 
-    this.aceEditor = ace.edit("ace-editor");
+    this.aceEditor = ace.edit('ace-editor');
     this.aceEditor.setShowPrintMargin(false);
-    this.aceEditor.getSession().setMode("ace/mode/javascript");
+    this.aceEditor.getSession().setMode('ace/mode/javascript');
     this.aceEditor.setValue(defaultRack, -1);
-    this.aceEditor.on("change", () => {
+    this.aceEditor.on('change', () => {
       self.codeLastChanged = Date.now();
     });
   }
@@ -88,7 +88,7 @@ export default class Audiopen {
     const visWidth = screenWidth / 2;
     const visHeight = screenHeight / 3;
 
-    this.view1crt = document.getElementById("view1crt");
+    this.view1crt = document.getElementById('view1crt');
 
     this.view1crt.width = visWidth;
     this.view1crt.height = visHeight;
@@ -97,12 +97,12 @@ export default class Audiopen {
 
     this.view1sel =
       this.view1sel ||
-      new NexusUI.Select("#view1sel", {
+      new NexusUI.Select('#view1sel', {
         size: [visWidth, 28],
-        options: ["frequency", "sonogram", "3d sonogram", "waveform"],
+        options: ['frequency', 'sonogram', '3d sonogram', 'waveform']
       });
 
-    this.view1sel.on("change", ({ index }) => {
+    this.view1sel.on('change', ({ index }) => {
       self.analyserView.setAnalysisType(index);
     });
   }
@@ -267,7 +267,7 @@ export default class Audiopen {
 
     let code = self.aceEditor.getValue();
 
-    code += "return { process };";
+    code += 'return { process };';
 
     try {
       const pack = code();
