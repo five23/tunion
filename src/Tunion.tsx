@@ -17,29 +17,22 @@ import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 
-import AceEditor from 'react-ace';
-
-import * as ace from 'ace-builds';
-import 'ace-builds/src-noconflict/mode-java';
-import 'ace-builds/src-noconflict/theme-github';
-import 'ace-builds/src-noconflict/ext-language_tools';
-import 'ace-builds/webpack-resolver';
-
 import { mainListItems, secondaryListItems } from './listItems.tsx';
 
 import Scopes from './Scopes.tsx';
 import Effects from './Effects.tsx';
 import VcoBank from './VcoBank.tsx';
 import SpeedDial from './SpeedDial.tsx';
+import Editor from './Editor.tsx';
 
-const drawerWidth = 240;
+const drawerWidth = 400;
 
 const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex'
   },
   toolbar: {
-    paddingRight: 24 // keep right padding when drawer closed
+    paddingRight: 0 // keep right padding when drawer closed
   },
   toolbarIcon: {
     display: 'flex',
@@ -87,10 +80,7 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen
     }),
-    width: theme.spacing(7),
-    [theme.breakpoints.up('sm')]: {
-      width: theme.spacing(9)
-    }
+    width: 0
   },
   appBarSpacer: theme.mixins.toolbar,
   content: {
@@ -103,7 +93,7 @@ const useStyles = makeStyles((theme) => ({
     paddingBottom: theme.spacing(4)
   },
   paper: {
-    padding: theme.spacing(2),
+    padding: 0,
     display: 'flex',
     overflow: 'auto',
     flexDirection: 'column'
@@ -114,26 +104,31 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 /**
- * Dashboard
+ * Tunion
  *
  * @export
  * @return {*}
  */
-export default function Dashboard() {
+export default function Tunion() {
   const classes = useStyles();
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
+
+  /**
+   * handleDrawerOpen
+   */
   const handleDrawerOpen = () => {
     setOpen(true);
   };
+
+  /**
+   * handleDrawerClose
+   */
   const handleDrawerClose = () => {
     setOpen(false);
   };
+
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
-  function onChange(newValue) {
-    console.log('change', newValue);
-  }
-  
   return (
     <div className={classes.root}>
       <CssBaseline />
@@ -161,7 +156,7 @@ export default function Dashboard() {
             noWrap
             className={classes.title}
           >
-            Dashboard
+            Tunion
           </Typography>
           <IconButton color="inherit">
             <Badge badgeContent={4} color="secondary">
@@ -182,23 +177,9 @@ export default function Dashboard() {
             <ChevronLeftIcon />
           </IconButton>
         </div>
-
-        <AceEditor
-          mode="java"
-          theme="github"
-          onChange={onChange}
-          name="UNIQUE_ID_OF_DIV"
-          editorProps={{ $blockScrolling: true }}
-          setOptions={{
-            enableBasicAutocompletion: true,
-            enableLiveAutocompletion: true,
-            enableSnippets: true
-          }}
-        />
         <Divider />
-        <List>{mainListItems}</List>
+        <Editor />
         <Divider />
-        <List>{secondaryListItems}</List>
       </Drawer>
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
