@@ -8,11 +8,6 @@ const audiopen = new Audiopen(audioCtx);
 
 window.audiopen = audiopen;
 
-/**
- * App
- *
- * @return {*}  {JSX.Element}
- */
 function App(): JSX.Element {
   return <Dashboard />;
 }
