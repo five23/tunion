@@ -18,7 +18,7 @@ export const defaultRack = `function process(buffer) {
     
     buffer[t] = 0.25 * audiopen.out;
   }
-  
+
   return buffer;
 }`;
 
@@ -74,7 +74,7 @@ export default class Audiopen {
   vco2: VCO;
   vco3: VCO;
   vco4: VCO;
-  AData: Uint8Array;
+  amplitudeData: Uint8Array;
   globalPadding: number;
   globalNavHeight: number;
   screenWidth: number;
@@ -198,7 +198,7 @@ export default class Audiopen {
     this.scriptNode.connect(self.analyser);
     this.scriptNode.connect(self.audioCtx.destination);
     this.analyserView.initByteBuffer(self.analyser);
-    this.AmplitudeData = new Uint8Array(self.analyser.frequencyBinCount);
+    this.amplitudeData = new Uint8Array(self.analyser.frequencyBinCount);
 
     this.mainLoop();
   }

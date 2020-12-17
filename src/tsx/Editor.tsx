@@ -35,7 +35,7 @@ export default function Editor(props) {
 
   return (
     <ReactAce.default
-      width="600"
+      width={1000}
       placeholder="Placeholder Text"
       mode="javascript"
       theme="xcode"
