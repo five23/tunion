@@ -7,11 +7,11 @@ import { Oscilloscope } from 'react-nexusui';
  * @export
  * @return {*} 
  */
-export default function Scopes() {
-  return (
-    <>
-      <h1>Scopes</h1>
-      <Oscilloscope />
-    </>
-  );
+export default function Scopes(): any {
+	return (
+		<React.Fragment>
+			<h1>Scopes</h1>
+			<Oscilloscope />
+		</React.Fragment>
+	);
 }

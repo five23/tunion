@@ -8,10 +8,10 @@ import { Dial } from 'react-nexusui';
  * @return {*} 
  */
 export default function Effects() {
-  return (
-    <>
-      <h1>Effects</h1>
-      <Dial />
-    </>
-  );
+	return (
+		<React.Fragment>
+			<h1>Effects</h1>
+			<Dial />
+		</React.Fragment>
+	);
 }

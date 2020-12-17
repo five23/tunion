@@ -37,11 +37,13 @@ export interface VCO {
   N?: number;
   out?: number;
   gain?: number;
-  vco1?: number;
-  vco2?: number;
-  vco3?: number;
-  vco4?: number;
+  vco1feed?: number;
+  vco2feed?: number;
+  vco3feed?: number;
+  vco4feed?: number;
   feedback?: number;
+  frequency?: number;
+  harmonics?: number;
 }
 
 /**
@@ -108,51 +110,14 @@ export default class Audiopen {
       theta: 0,
       N: 0,
       out: 0,
-      gain: 1,
-      vco1: 0,
-      vco2: 0,
-      vco3: 0,
-      vco4: 0,
-      feedback: 0
-    };
-
-    this.vco2 = {
-      step: 0,
-      theta: 0,
-      N: 0,
-      out: 0,
-      gain: 1,
-      vco1: 0,
-      vco2: 0,
-      vco3: 0,
-      vco4: 0,
-      feedback: 0
-    };
-
-    this.vco3 = {
-      step: 0,
-      theta: 0,
-      N: 0,
-      out: 0,
-      gain: 1,
-      vco1: 0,
-      vco2: 0,
-      vco3: 0,
-      vco4: 0,
-      feedback: 0
-    };
-
-    this.vco4 = {
-      step: 0,
-      theta: 0,
-      N: 0,
-      out: 0,
-      gain: 1,
-      vco1: 0,
-      vco2: 0,
-      vco3: 0,
-      vco4: 0,
-      feedback: 0
+      gain: 0.25,
+      vco1feed: 0,
+      vco2feed: 0,
+      vco3feed: 0,
+      vco4feed: 0,
+      feedback: 0,
+      frequency: 0,
+      harmonics: 0
     };
 
     this.globalPadding = 20;
@@ -197,6 +162,8 @@ export default class Audiopen {
    * @memberof AudioPen
    */
   processTheta() {
+    let self = this;
+
     this.vco1.step = H.lpf(800, this.vco1.step);
     this.vco1.N = H.lpf(4, this.vco1.N);
     this.vco1.theta += this.vco1.step;
