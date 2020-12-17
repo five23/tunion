@@ -1,15 +1,14 @@
-import PropTypes from 'prop-types';
-import React from 'react';
-import AceEditor from 'react-ace';
-
+import 'ace-builds';
 import 'ace-builds/src-noconflict/mode-javascript';
 import 'ace-builds/src-noconflict/theme-xcode';
-import 'ace-builds/webpack-resolver';
+
+import * as React from 'react';
+import * as ReactAce from 'react-ace';
 
 import { defaultRack } from './Audiopen.tsx';
 import { audiopen } from './Tunion.tsx';
 
-/** 
+/**
  * Editor
  *
  * @export
@@ -17,45 +16,42 @@ import { audiopen } from './Tunion.tsx';
  * @return {*}
  */
 export default function Editor(props) {
-	/**
+  /**
    * onChange
    *
    * @param {*}
    */
-	function onChange(codeToCompile) {
-		audiopen.codeToCompile = codeToCompile;
-		audiopen.codeLastChanged = Date.now();
-	}
+  function onChange(codeToCompile) {
+    audiopen.codeToCompile = codeToCompile;
+    audiopen.codeLastChanged = Date.now();
+  }
 
-	/**
+  /**
    * onLoad
    */
-	function onLoad() {
-		console.log('load');
-	}
+  function onLoad() {
+    console.log('load');
+  }
 
-	return (
-		<AceEditor
-			width='500'
-			placeholder="Placeholder Text"
-			mode="javascript"
-			theme="xcode"
-			name="ace-editor"
-			onLoad={onLoad}
-			onChange={onChange}
-			fontSize={14}
-			showPrintMargin={false}
-			showGutter={true}
-			highlightActiveLine={false}
-			value={defaultRack}
-			setOptions={{
-				showLineNumbers: true,
-				tabSize: 2
-			}}
-		/>
-	);
+  return (
+    <ReactAce.default
+      width="600"
+      placeholder="Placeholder Text"
+      mode="javascript"
+      theme="xcode"
+      name="ace-editor"
+      onLoad={onLoad}
+      onChange={onChange}
+      fontSize={14}
+      showPrintMargin={false}
+      showGutter={true}
+      highlightActiveLine={false}
+      value={defaultRack}
+      setOptions={{
+        showLineNumbers: true,
+        tabSize: 2,
+        useWorker: false
+      }}
+    />
+  );
 }
-
-Editor.propTypes = {
-	children: PropTypes.node
-};

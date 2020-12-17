@@ -4,24 +4,21 @@ import { H } from './Tunion.tsx';
 export const defaultRack = `function process(buffer) {  
   for (var t = 0; t < buffer.length; ++t) {    
     audiopen.processTheta();
+    audiopen.processVcoGain();    
 
-    audiopen.vco1.out = H.sqr12(audiopen.vco1.theta, 4);
+    audiopen.vco1.out = H.sqr12(audiopen.vco1.theta, audiopen.vco1.N);
+    audiopen.vco2.out = H.sqr12(audiopen.vco2.theta, audiopen.vco2.N);
+    audiopen.vco3.out = H.sqr12(audiopen.vco3.theta, audiopen.vco3.N);
+    audiopen.vco4.out = H.sqr12(audiopen.vco4.theta, audiopen.vco4.N);
 
-    //vco2.out = H.saw12(vco2.theta, vco2.N + vco2.feedback);
-    //vco3.out = H.revsaw12(vco3.theta, vco3.N + vco3.feedback);
-    //vco4.out = H.tri12(vco4.theta, vco4.N - vco4.feedback);
+    audiopen.out = audiopen.vco1.A * audiopen.vco1.out + 
+                   audiopen.vco2.A * audiopen.vco2.out + 
+                   audiopen.vco3.A * audiopen.vco3.out + 
+                   audiopen.vco4.A * audiopen.vco4.out;
     
-    //audiopen.processFeedbackMatrix();
-    //audiopen.processVcoGain();
-    //out = 0.25 * (vco1.gain * vco1.out + vco2.gain * vco2.out + vco3.gain * vco3.out + vco4.gain * vco4.out);    
-    //const delayOut = delay.gain(d0gain.value).feedback(d0feedback.value).time(d0time.value).run(out);
-    //buffer[t] = 0.5 * (out + delayOut);
-    //audiopen.processDrift();
-
-    audiopen.out = 0.25 * audiopen.vco1.out;
-    
-    buffer[t] = audiopen.out;
+    buffer[t] = 0.25 * audiopen.out;
   }
+  
   return buffer;
 }`;
 
@@ -37,6 +34,7 @@ export interface VCO {
   N?: number;
   out?: number;
   gain?: number;
+  A?: number;
   vco1feed?: number;
   vco2feed?: number;
   vco3feed?: number;
@@ -76,7 +74,7 @@ export default class Audiopen {
   vco2: VCO;
   vco3: VCO;
   vco4: VCO;
-  amplitudeData: Uint8Array;
+  AData: Uint8Array;
   globalPadding: number;
   globalNavHeight: number;
   screenWidth: number;
@@ -110,7 +108,56 @@ export default class Audiopen {
       theta: 0,
       N: 0,
       out: 0,
-      gain: 0.25,
+      gain: 0,
+      A: 0,
+      vco1feed: 0,
+      vco2feed: 0,
+      vco3feed: 0,
+      vco4feed: 0,
+      feedback: 0,
+      frequency: 0,
+      harmonics: 0
+    };
+
+    this.vco2 = {
+      step: 0,
+      theta: 0,
+      N: 0,
+      out: 0,
+      gain: 0,
+      A: 0,
+      vco1feed: 0,
+      vco2feed: 0,
+      vco3feed: 0,
+      vco4feed: 0,
+      feedback: 0,
+      frequency: 0,
+      harmonics: 0
+    };
+
+    this.vco3 = {
+      step: 0,
+      theta: 0,
+      N: 0,
+      out: 0,
+      gain: 0,
+      A: 0,
+      vco1feed: 0,
+      vco2feed: 0,
+      vco3feed: 0,
+      vco4feed: 0,
+      feedback: 0,
+      frequency: 0,
+      harmonics: 0
+    };
+
+    this.vco4 = {
+      step: 0,
+      theta: 0,
+      N: 0,
+      out: 0,
+      gain: 0,
+      A: 0,
       vco1feed: 0,
       vco2feed: 0,
       vco3feed: 0,
@@ -151,7 +198,7 @@ export default class Audiopen {
     this.scriptNode.connect(self.analyser);
     this.scriptNode.connect(self.audioCtx.destination);
     this.analyserView.initByteBuffer(self.analyser);
-    this.amplitudeData = new Uint8Array(self.analyser.frequencyBinCount);
+    this.AmplitudeData = new Uint8Array(self.analyser.frequencyBinCount);
 
     this.mainLoop();
   }
@@ -164,10 +211,48 @@ export default class Audiopen {
   processTheta() {
     let self = this;
 
-    this.vco1.step = H.lpf(800, this.vco1.step);
-    this.vco1.N = H.lpf(4, this.vco1.N);
+    this.vco1.step = H.lpf(this.vco1.frequency, this.vco1.step);
+    this.vco2.step = H.lpf(this.vco2.frequency, this.vco2.step);
+    this.vco3.step = H.lpf(this.vco3.frequency, this.vco3.step);
+    this.vco4.step = H.lpf(this.vco4.frequency, this.vco4.step);
+
+    this.vco1.N = H.lpf(this.vco1.harmonics, this.vco1.N);
+    this.vco2.N = H.lpf(this.vco2.harmonics, this.vco2.N);
+    this.vco3.N = H.lpf(this.vco3.harmonics, this.vco3.N);
+    this.vco4.N = H.lpf(this.vco4.harmonics, this.vco4.N);
+
     this.vco1.theta += this.vco1.step;
+    this.vco2.theta += this.vco2.step;
+    this.vco3.theta += this.vco3.step;
+    this.vco4.theta += this.vco4.step;
   }
+
+  /**
+   * processDrift
+   *
+   * @memberof AudioPen
+   */
+  processDrift() {
+    this.vco1.theta *= 1.0000000112;
+    this.vco2.theta *= 0.9999999886;
+    this.vco3.theta *= 1.0000000123;
+    this.vco4.theta *= 0.9999999875;
+  }
+
+  /**
+   * processVcoGain
+   *
+   * @memberof AudioPen
+   */
+  processVcoGain() {
+    let self = this;
+
+    this.vco1.A = H.lpf(this.vco1.gain, this.vco1.A);
+    this.vco2.A = H.lpf(this.vco2.gain, this.vco2.A);
+    this.vco3.A = H.lpf(this.vco3.gain, this.vco3.A);
+    this.vco4.A = H.lpf(this.vco4.gain, this.vco4.A);
+  }
+
 
   /**
    * compileCode

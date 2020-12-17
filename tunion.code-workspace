@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../react-nexusui"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "tuni0n"
+	}
+}

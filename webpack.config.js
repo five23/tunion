@@ -38,7 +38,7 @@ module.exports = [
       new HtmlWebpackPlugin({
         template: './src/index.html',
         filename: './index.html',
-        minify: false
+        minify: true
       }),
       new CopyWebpackPlugin({
         patterns: [{ from: 'src/favicon.ico', to: '.' }]
